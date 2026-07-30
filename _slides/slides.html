@@ -1,0 +1,873 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeanDatabase</title><link rel="stylesheet" href="lib/reveal.js/dist/reset.css">
+    <link rel="stylesheet" href="lib/reveal.js/dist/reveal.css">
+    <link rel="stylesheet" href="lib/reveal.js/dist/theme/white.css">
+    <link rel="stylesheet" href="lib/monokai.css">
+    <link rel="stylesheet" href="query-console.css">
+    <link rel="stylesheet" href="lib/highlighting.css">
+    <link rel="stylesheet" href="lib/tippy-border.css">
+    <link rel="stylesheet" href="lib/slides-highlight.css">
+    <link rel="stylesheet" href="lib/panel.css">
+    <link rel="stylesheet" href="lib/lightbox.css">
+    <link rel="stylesheet" href="lib/diagram.css">
+    <link rel="stylesheet" href="lib/illuminate-anim.css">
+    <link rel="stylesheet" href="lib/table.css">
+    <link rel="stylesheet" href="lib/katex/dist/katex.min.css">
+    </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section data-background-color="#211c17">
+          <h2>
+            LeanDatabase</h2>
+          <p>
+            <strong>Formalising Relational Databases in Lean 4</strong></p>
+          <p style="margin-top: 5em; text-align: center; font-size: 0.7em; color: #a9b7c6; font-family: 'Helvetica Neue', sans-serif; font-weight: 300; letter-spacing: 1px;">
+            Summer School : LeanLang for Programming &nbsp;•&nbsp; July 2026 &nbsp;•&nbsp; IISc Bangalore &nbsp;•&nbsp; Organised by Emergence India Labs</p>
+          </section>
+        <section>
+          <h2>
+            <span class="kicker">CONTRIBUTORS</span> Project Team</h2>
+          <ul>
+            <li>
+              <p>
+                Siddhartha Gadgil</p>
+              </li>
+            <li>
+              <p>
+                Anirudh Gupta</p>
+              </li>
+            <li>
+              <p>
+                Ajay Kumar Nair</p>
+              </li>
+            <li>
+              <p>
+                Dattabhasvant Gadiyaram</p>
+              </li>
+            </ul>
+          <p style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 2em; padding: 10px 20px; background: rgba(255,255,255,0.1); border-radius: 8px; width: max-content;">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub Logo"></p>
+          <p style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 2em; padding: 10px 20px; background: rgba(255,255,255,0.1); border-radius: 8px; width: max-content;">
+            Github Repository: <a href="https://github.com/siddhartha-gadgil/LeanDatabase">siddhartha-gadgil/LeanDatabase</a></p>
+          <aside class="notes"><p>
+              Opening slide. Introduce yourself, then frame the talk: this is a Lean4 project that
+formalizes SQL semantics well enough to <strong>prove</strong> — not test, not sample — that two queries
+always return the same rows.</p>
+            </aside></section>
+        <section data-background-color="#211c17">
+          <h2>
+            <span class="kicker">WHAT?</span> Relational Databases and SQL</h2>
+          <ul class="fragment">
+            <li>
+              <p>
+                A lot of information in the world is stored in relational databases — think of your bank account, your social media feed, or the data behind a web app.</p>
+              </li>
+            </ul>
+          <ul class="fragment">
+            <li>
+              <p>
+                The way we interact with relational databases is through SQL queries, which are used to retrieve, manipulate, and analyze data.</p>
+              </li>
+            </ul>
+          <ul class="fragment">
+            <li>
+              <p>
+                SQL is the lingua franca of data science, data engineering, and analytics.</p>
+              </li>
+            </ul>
+          <ul class="fragment">
+            <li>
+              <p>
+                It is the most widely used language for interacting with structured data. In short, it is the language in which we talk to the databases that power our digital world.</p>
+              </li>
+            </ul>
+          <pre class="fragment"><code class="language-sql">SELECT customer_id, SUM(amount) AS total_spent
+FROM orders
+WHERE status = 'paid'
+GROUP BY customer_id;
+</code></pre></section>
+        <section>
+          <h2>
+            <span class="kicker">WHY?</span> SQL Querying</h2>
+          <ul class="fragment">
+            <li>
+              <p>
+                Almost always there is more than one way to write a query that returns the same result.</p>
+              </li>
+            </ul>
+          <ul class="fragment">
+            <li>
+              <p>
+                You might want to rewrite a query to make it more performance-efficient, or to make it easier to read.</p>
+              </li>
+            </ul>
+          <ul class="fragment">
+            <li>
+              <p>
+                One might use an LLM to rewrite a query, but how do you know the rewritten query is equivalent to the original?</p>
+              </li>
+            </ul>
+          </section>
+        <section data-background-color="#211c17">
+          <h2>
+            <span class="kicker">HOW?</span> Proving SQL Equivalence in Lean</h2>
+          <p>
+            Here are some examples of SQL queries that are equivalent, but not obviously so. We will show how our Lean formalisation can prove their equivalence.</p>
+          </section>
+        <section>
+          <section>
+            <h2>
+              1</h2>
+            <div class="r-hstack fragment">
+              <div class="r-vstack">
+                <p style="text-align: center; margin-bottom: 0.5em; font-size: 1.1em">
+                  <strong><code>table</code></strong></p>
+                <table class="slide-table row-seps"><thead><tr><th scope="col"><p>
+                          Column</p>
+                        </th><th scope="col"><p>
+                          Type
+</p>
+                        </th></tr></thead><tbody><tr><td><p>
+                          <code>age</code></p>
+                        </td><td><p>
+                          <code>INT</code>
+</p>
+                        </td></tr><tr><td><p>
+                          <code>isActive</code></p>
+                        </td><td><p>
+                          <code>BOOL</code>
+</p>
+                        </td></tr><tr><td><p>
+                          <code>height</code></p>
+                        </td><td><p>
+                          <code>FLOAT</code></p>
+                        </td></tr></tbody></table></div>
+              </div>
+            <div class="r-hstack fragment" style="margin-top: 3em;">
+              <pre><code class="language-sql">SELECT * FROM table
+WHERE NOT (age &gt; 30 OR isActive)
+</code></pre><p class="equiv-mark" style="margin: 0 2em; align-self: center;">
+                ≡</p>
+              <pre><code class="language-sql">SELECT * FROM table
+WHERE NOT (age &gt; 30)
+  AND NOT isActive
+</code></pre></div>
+            </section>
+          <section>
+            <h3>
+              Proof</h3>
+            <div class="code-with-panel r-stretch">
+              <code class="hl lean block"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.example-4220">example</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-4228">:</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-4234" data-verso-hover="0">sql%</span><span class="punctuation bracket token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-4234">(</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-4239">[</span><span class="const token" data-binding="const-table_schema" data-verso-hover="1">table_schema</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-4239">]</span><span class="punctuation bracket token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-4234">)</span><span class="inter-text"> </span><span class="literal string token" data-binding="" data-verso-hover="2">"SELECT * FROM table
+                          WHERE NOT (age &gt; 30 OR isActive)"</span><span class="inter-text">
+      </span><span class="punctuation operator token" data-binding="kw-occ-«term_=_»-4234">=</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-4344" data-verso-hover="0">sql%</span><span class="punctuation bracket token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-4344">(</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-4349">[</span><span class="const token" data-binding="const-table_schema" data-verso-hover="1">table_schema</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-4349">]</span><span class="punctuation bracket token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-4344">)</span><span class="inter-text"> </span><span class="literal string token" data-binding="" data-verso-hover="3">"SELECT * FROM table
+                              WHERE NOT (age &gt; 30) AND NOT isActive"</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Command.declValSimple-4455">:=</span><span class="inter-text"> </span><span class="tactic" data-tactic-range="4458-4460"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.byTactic-4458" data-verso-hover="4">by</span><span class="tactic-state" style="display:none" data-rich-format="[{&quot;goalPrefix&quot;:&quot;⊢ &quot;,&quot;hypotheses&quot;:[],&quot;name&quot;:null,&quot;ppConclusion&quot;:&quot;{\&quot;annotations\&quot;:{\&quot;10\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.34324\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;11\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.34333\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1131941\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.34314\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1159106833\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.34304\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;12\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.34340\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;13\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.34341\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1382020\&quot;:{\&quot;binding\&quot;:\&quot;const-Bool.not\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;2\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.34268\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;21504\&quot;:{\&quot;binding\&quot;:\&quot;const-LeanDatabase.restriction\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;21588\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.34333\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;22112336\&quot;:{\&quot;binding\&quot;:\&quot;const-Decidable.decide\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;277\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.34268\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;282980\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.34277\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;282984\&quot;:{\&quot;binding\&quot;:\&quot;const-Bool.not\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;3\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.34277\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;345508\&quot;:{\&quot;binding\&quot;:\&quot;const-Bool.not\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;345509\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.34341\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;353797393\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.34340\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;70656\&quot;:{\&quot;binding\&quot;:\&quot;const-LeanDatabase.restriction\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;70740\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.34277\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;72444176\&quot;:{\&quot;binding\&quot;:\&quot;const-Decidable.decide\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;8\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.34304\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;85\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.34324\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;86372\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.34333\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;9\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.34314\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;}},\&quot;fmt\&quot;:[6,[6,[3,2,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,2,\&quot;table\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,[6,[3,2,[7,70656,\&quot;LeanDatabase.restriction\&quot;]]],[4,1,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,3,\&quot;coords\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,8,\&quot;table.age\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,70740,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,70741,\&quot;0\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,9,\&quot;table.isActive\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,282980,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,282981,\&quot;1\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,[7,282984,\&quot;!\&quot;],[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[4,[6,[3,2,[7,72444176,\&quot;decide\&quot;]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,1159106833,\&quot;table.age\&quot;]]],[4,[4,\&quot; >\&quot;,1],[6,[3,2,[7,289776709,\&quot;30\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]],[4,[4,\&quot; ||\&quot;,1],[6,[3,2,[7,1131941,\&quot;table.isActive\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],\&quot;)\&quot;]]]],[4,1,[6,[3,2,[7,277,\&quot;table\&quot;]]]]]]]]]]]],\&quot;)\&quot;]]]],[4,[4,\&quot; =\&quot;,1],[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,10,\&quot;table\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,[6,[3,2,[7,21504,\&quot;LeanDatabase.restriction\&quot;]]],[4,1,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,11,\&quot;coords\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,12,\&quot;table.age\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,21588,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,21589,\&quot;0\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,13,\&quot;table.isActive\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,86372,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,86373,\&quot;1\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,[6,[3,2,[4,[7,1382020,\&quot;!\&quot;],[6,[3,2,[4,[6,[3,2,[7,22112336,\&quot;decide\&quot;]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,353797393,\&quot;table.age\&quot;]]],[4,[4,\&quot; >\&quot;,1],[6,[3,2,[7,88449349,\&quot;30\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]]]]],[4,[4,\&quot; &amp;&amp;\&quot;,1],[6,[3,2,[4,[7,345508,\&quot;!\&quot;],[6,[3,2,[7,345509,\&quot;table.isActive\&quot;]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],\&quot;)\&quot;]]]],[4,1,[6,[3,2,[7,85,\&quot;table\&quot;]]]]]]]]]]]]]]]]]}&quot;}]"><span class="goal"><span class="conclusion"><span class="prefix">⊢ </span><span class="type"><span class="unknown token" data-binding="">(fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.34268" data-verso-hover="5">table</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+    </span><span class="const token" data-binding="const-LeanDatabase.restriction" data-verso-hover="6">LeanDatabase.restriction</span><span class="inter-text">
+      </span><span class="unknown token" data-binding="">(fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.34277" data-verso-hover="7">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+        </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.34304" data-verso-hover="8">table.age</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.34277" data-verso-hover="7">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">0</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+        </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.34314" data-verso-hover="9">table.isActive</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.34277" data-verso-hover="7">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">1</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+        </span><span class="const token" data-binding="const-Bool.not" data-verso-hover="10">!</span><span class="const token" data-binding="const-Bool.or" data-verso-hover="11">(</span><span class="const token" data-binding="const-Decidable.decide" data-verso-hover="12">decide</span><span class="inter-text"> </span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">(</span><span class="var token" data-binding="var-_uniq.34304" data-verso-hover="8">table.age</span><span class="inter-text"> </span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">&gt;</span><span class="inter-text"> </span><span class="unknown token" data-binding="">30</span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">)</span><span class="inter-text"> </span><span class="const token" data-binding="const-Bool.or" data-verso-hover="11">||</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.34314" data-verso-hover="9">table.isActive</span><span class="const token" data-binding="const-Bool.or" data-verso-hover="11">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+      </span><span class="var token" data-binding="var-_uniq.34268" data-verso-hover="5">table</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">=</span><span class="inter-text">
+  </span><span class="keyword token" data-binding="">fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.34324" data-verso-hover="5">table</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+  </span><span class="const token" data-binding="const-LeanDatabase.restriction" data-verso-hover="6">LeanDatabase.restriction</span><span class="inter-text">
+    </span><span class="unknown token" data-binding="">(fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.34333" data-verso-hover="7">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+      </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.34340" data-verso-hover="8">table.age</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.34333" data-verso-hover="7">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">0</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+      </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.34341" data-verso-hover="9">table.isActive</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.34333" data-verso-hover="7">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">1</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+      </span><span class="const token" data-binding="const-Bool.not" data-verso-hover="10">!</span><span class="const token" data-binding="const-Decidable.decide" data-verso-hover="12">decide</span><span class="inter-text"> </span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">(</span><span class="var token" data-binding="var-_uniq.34340" data-verso-hover="8">table.age</span><span class="inter-text"> </span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">&gt;</span><span class="inter-text"> </span><span class="unknown token" data-binding="">30</span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">)</span><span class="inter-text"> </span><span class="const token" data-binding="const-Bool.and" data-verso-hover="15">&&</span><span class="inter-text"> </span><span class="const token" data-binding="const-Bool.not" data-verso-hover="10">!</span><span class="var token" data-binding="var-_uniq.34341" data-verso-hover="9">table.isActive</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+    </span><span class="var token" data-binding="var-_uniq.34324" data-verso-hover="5">table</span></span></span></span></span></span><span class="inter-text">
+  </span><span class="tactic" data-tactic-range="4463-4472"><span class="keyword token" data-binding="kw-occ-LeanDatabase.SQLEquiv.tacticSql_equiv-4463">sql_equiv</span><span class="tactic-state" style="display:none">All goals completed! 🐙</span></span><span class="inter-text">
+</span><span class="unknown token" data-binding=""></span></code><div class="panel-divider"></div>
+              <div class="panel-cell">
+                <div class="info-panel"></div>
+                </div>
+              </div>
+            </section>
+          </section>
+        <section>
+          <section>
+            <h2>
+              2</h2>
+            <div class="r-hstack fragment">
+              <div class="r-vstack">
+                <p style="text-align: center; margin-bottom: 0.5em; font-size: 1.1em">
+                  <strong><code>r1</code></strong></p>
+                <table class="slide-table row-seps"><thead><tr><th scope="col"><p>
+                          Column</p>
+                        </th><th scope="col"><p>
+                          Type
+</p>
+                        </th></tr></thead><tbody><tr><td><p>
+                          <code>is_high_value</code></p>
+                        </td><td><p>
+                          <code>BOOL</code>
+</p>
+                        </td></tr><tr><td><p>
+                          <code>val</code></p>
+                        </td><td><p>
+                          <code>INT</code></p>
+                        </td></tr></tbody></table></div>
+              <div class="r-vstack">
+                <p style="text-align: center; margin-bottom: 0.5em; font-size: 1.1em">
+                  <strong><code>r2</code></strong></p>
+                <table class="slide-table row-seps"><thead><tr><th scope="col"><p>
+                          Column</p>
+                        </th><th scope="col"><p>
+                          Type
+</p>
+                        </th></tr></thead><tbody><tr><td><p>
+                          <code>is_high_value</code></p>
+                        </td><td><p>
+                          <code>BOOL</code>
+</p>
+                        </td></tr><tr><td><p>
+                          <code>val</code></p>
+                        </td><td><p>
+                          <code>INT</code></p>
+                        </td></tr></tbody></table></div>
+              </div>
+            <div class="r-hstack fragment" style="margin-top: 3em;">
+              <pre><code class="language-sql">SELECT * FROM
+  (SELECT * FROM r1
+   UNION
+   SELECT * FROM r2)
+WHERE is_high_value
+</code></pre><p class="equiv-mark" style="margin: 0 2em; align-self: center;">
+                ≡</p>
+              <pre><code class="language-sql">SELECT * FROM r1
+  WHERE is_high_value
+UNION
+SELECT * FROM r2
+  WHERE is_high_value
+</code></pre></div>
+            </section>
+          <section>
+            <h3>
+              Proof</h3>
+            <div class="code-with-panel r-stretch">
+              <code class="hl lean block"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.example-5421">example</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-5429">:</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-5435" data-verso-hover="0">sql%</span><span class="punctuation bracket token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-5435">(</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-5440">[</span><span class="const token" data-binding="const-r1_schema" data-verso-hover="16">r1_schema</span><span class="punctuation separator token" data-binding="kw-occ-«term[_]»-5440">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-r2_schema" data-verso-hover="17">r2_schema</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-5440">]</span><span class="punctuation bracket token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-5435">)</span><span class="inter-text">
+        </span><span class="literal string token" data-binding="" data-verso-hover="18">"SELECT * FROM (SELECT * FROM r1 UNION SELECT * FROM r2) AS u
+         WHERE is_high_value"</span><span class="inter-text">
+      </span><span class="punctuation operator token" data-binding="kw-occ-«term_=_»-5435">=</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-5572" data-verso-hover="0">sql%</span><span class="punctuation bracket token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-5572">(</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-5577">[</span><span class="const token" data-binding="const-r1_schema" data-verso-hover="16">r1_schema</span><span class="punctuation separator token" data-binding="kw-occ-«term[_]»-5577">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-r2_schema" data-verso-hover="17">r2_schema</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-5577">]</span><span class="punctuation bracket token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-5572">)</span><span class="inter-text">
+        </span><span class="literal string token" data-binding="" data-verso-hover="19">"SELECT * FROM r1 WHERE r1.is_high_value
+         UNION
+         SELECT * FROM r2 WHERE r2.is_high_value"</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Command.declValSimple-5715">:=</span><span class="inter-text"> </span><span class="tactic" data-tactic-range="5718-5720"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.byTactic-5718" data-verso-hover="4">by</span><span class="tactic-state" style="display:none" data-rich-format="[{&quot;goalPrefix&quot;:&quot;⊢ &quot;,&quot;hypotheses&quot;:[],&quot;name&quot;:null,&quot;ppConclusion&quot;:&quot;{\&quot;annotations\&quot;:{\&quot;10\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.240548\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;11\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.240549\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1135616\&quot;:{\&quot;binding\&quot;:\&quot;const-LeanDatabase.union\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;12\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.240566\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;13\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.240574\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1365\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.240549\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1393664\&quot;:{\&quot;binding\&quot;:\&quot;const-LeanDatabase.restriction\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;1393748\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.240566\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;14\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.240591\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;15\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.240599\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;17745\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.240492\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;2\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.240492\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;283648\&quot;:{\&quot;binding\&quot;:\&quot;const-LeanDatabase.restriction\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;283732\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.240517\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;3\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.240493\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;348438\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.240574\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;349184\&quot;:{\&quot;binding\&quot;:\&quot;const-LeanDatabase.restriction\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;349268\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.240591\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;4437\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.240493\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;5445\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.240548\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;70934\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.240538\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;8\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.240517\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;87040\&quot;:{\&quot;binding\&quot;:\&quot;const-LeanDatabase.union\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;87318\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.240599\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;9\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.240538\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;}},\&quot;fmt\&quot;:[6,[6,[3,2,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,2,\&quot;r1\&quot;]]],[4,1,[4,[6,[3,2,[7,3,\&quot;r2\&quot;]]],\&quot; =>\&quot;]]]]]],[4,1,[6,[3,2,[4,[6,[3,2,[7,283648,\&quot;LeanDatabase.restriction\&quot;]]],[4,1,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,8,\&quot;coords\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,9,\&quot;r1.is_high_value\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,283732,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,283733,\&quot;0\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[7,70934,\&quot;r1.is_high_value\&quot;]]]]]]]]]]]]]]]]],\&quot;)\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,1135616,\&quot;LeanDatabase.union\&quot;]]],[4,1,[4,[6,[3,2,[7,17745,\&quot;r1\&quot;]]],[4,1,[6,[3,2,[7,4437,\&quot;r2\&quot;]]]]]]]]]],\&quot;)\&quot;]]]]]]]]]]]]],\&quot;)\&quot;]]]],[4,[4,\&quot; =\&quot;,1],[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,10,\&quot;r1\&quot;]]],[4,1,[4,[6,[3,2,[7,11,\&quot;r2\&quot;]]],\&quot; =>\&quot;]]]]]],[4,1,[6,[3,2,[4,[6,[3,2,[7,87040,\&quot;LeanDatabase.union\&quot;]]],[4,1,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,1393664,\&quot;LeanDatabase.restriction\&quot;]]],[4,1,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,12,\&quot;coords\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,13,\&quot;r1.is_high_value\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,1393748,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,1393749,\&quot;0\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[7,348438,\&quot;r1.is_high_value\&quot;]]]]]]]]]]]]]]]]],\&quot;)\&quot;]]]],[4,1,[6,[3,2,[7,5445,\&quot;r1\&quot;]]]]]]]]]],\&quot;)\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,349184,\&quot;LeanDatabase.restriction\&quot;]]],[4,1,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,14,\&quot;coords\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,15,\&quot;r2.is_high_value\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,349268,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,349269,\&quot;0\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[7,87318,\&quot;r2.is_high_value\&quot;]]]]]]]]]]]]]]]]],\&quot;)\&quot;]]]],[4,1,[6,[3,2,[7,1365,\&quot;r2\&quot;]]]]]]]]]],\&quot;)\&quot;]]]]]]]]]]]]]]]]]]}&quot;}]"><span class="goal"><span class="conclusion"><span class="prefix">⊢ </span><span class="type"><span class="unknown token" data-binding="">(fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.240492" data-verso-hover="20">r1</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.240493" data-verso-hover="20">r2</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+    </span><span class="const token" data-binding="const-LeanDatabase.restriction" data-verso-hover="6">LeanDatabase.restriction</span><span class="inter-text">
+      </span><span class="unknown token" data-binding="">(fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.240517" data-verso-hover="21">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+        </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.240538" data-verso-hover="9">r1.is_high_value</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.240517" data-verso-hover="21">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">0</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+        </span><span class="var token" data-binding="var-_uniq.240538" data-verso-hover="9">r1.is_high_value</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+      </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-LeanDatabase.union" data-verso-hover="22">LeanDatabase.union</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.240492" data-verso-hover="20">r1</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.240493" data-verso-hover="20">r2</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">=</span><span class="inter-text">
+  </span><span class="keyword token" data-binding="">fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.240548" data-verso-hover="20">r1</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.240549" data-verso-hover="20">r2</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+  </span><span class="const token" data-binding="const-LeanDatabase.union" data-verso-hover="22">LeanDatabase.union</span><span class="inter-text">
+    </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-LeanDatabase.restriction" data-verso-hover="6">LeanDatabase.restriction</span><span class="inter-text">
+      </span><span class="unknown token" data-binding="">(fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.240566" data-verso-hover="21">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+        </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.240574" data-verso-hover="9">r1.is_high_value</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.240566" data-verso-hover="21">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">0</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+        </span><span class="var token" data-binding="var-_uniq.240574" data-verso-hover="9">r1.is_high_value</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+      </span><span class="var token" data-binding="var-_uniq.240548" data-verso-hover="20">r1</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+    </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-LeanDatabase.restriction" data-verso-hover="6">LeanDatabase.restriction</span><span class="inter-text">
+      </span><span class="unknown token" data-binding="">(fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.240591" data-verso-hover="21">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+        </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.240599" data-verso-hover="9">r2.is_high_value</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.240591" data-verso-hover="21">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">0</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+        </span><span class="var token" data-binding="var-_uniq.240599" data-verso-hover="9">r2.is_high_value</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+      </span><span class="var token" data-binding="var-_uniq.240549" data-verso-hover="20">r2</span><span class="unknown token" data-binding="">)</span></span></span></span></span></span><span class="inter-text">
+  </span><span class="tactic" data-tactic-range="5723-5732"><span class="keyword token" data-binding="kw-occ-LeanDatabase.SQLEquiv.tacticSql_equiv-5723">sql_equiv</span><span class="tactic-state" style="display:none">All goals completed! 🐙</span></span><span class="inter-text">
+</span><span class="unknown token" data-binding=""></span></code><div class="panel-divider"></div>
+              <div class="panel-cell">
+                <div class="info-panel"></div>
+                </div>
+              </div>
+            </section>
+          </section>
+        <section>
+          <section>
+            <h2>
+              3</h2>
+            <div class="r-hstack fragment">
+              <div class="r-vstack">
+                <p style="text-align: center; margin-bottom: 0.5em; font-size: 1.1em">
+                  <strong><code>customers</code></strong></p>
+                <table class="slide-table row-seps"><thead><tr><th scope="col"><p>
+                          Column</p>
+                        </th><th scope="col"><p>
+                          Type
+</p>
+                        </th></tr></thead><tbody><tr><td><p>
+                          <code>customer_id</code></p>
+                        </td><td><p>
+                          <code>INT</code>
+</p>
+                        </td></tr><tr><td><p>
+                          <code>name</code></p>
+                        </td><td><p>
+                          <code>STRING</code></p>
+                        </td></tr></tbody></table></div>
+              <div class="r-vstack">
+                <p style="text-align: center; margin-bottom: 0.5em; font-size: 1.1em">
+                  <strong><code>orders</code></strong></p>
+                <table class="slide-table row-seps"><thead><tr><th scope="col"><p>
+                          Column</p>
+                        </th><th scope="col"><p>
+                          Type
+</p>
+                        </th></tr></thead><tbody><tr><td><p>
+                          <code>customer_id</code></p>
+                        </td><td><p>
+                          <code>INT</code>
+</p>
+                        </td></tr><tr><td><p>
+                          <code>total</code></p>
+                        </td><td><p>
+                          <code>INT</code></p>
+                        </td></tr></tbody></table></div>
+              </div>
+            <div class="r-hstack fragment" style="margin-top: 3em;">
+              <pre><code class="language-sql">SELECT * FROM customers c
+WHERE EXISTS (
+  SELECT 1 FROM orders o
+  WHERE orders.customer_id
+      = customers.customer_id)
+</code></pre><p class="equiv-mark" style="margin: 0 2em; align-self: center;">
+                ≡</p>
+              <pre><code class="language-sql">SELECT * FROM customers c
+WHERE customers.customer_id IN (
+  SELECT customer_id
+  FROM orders)
+</code></pre></div>
+            </section>
+          <section>
+            <h3>
+              Proof</h3>
+            <div class="code-with-panel r-stretch">
+              <code class="hl lean block"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.example-6743">example</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-6751">:</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-6757" data-verso-hover="0">sql%</span><span class="punctuation bracket token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-6757">(</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-6762">[</span><span class="const token" data-binding="const-customers_schema" data-verso-hover="23">customers_schema</span><span class="punctuation separator token" data-binding="kw-occ-«term[_]»-6762">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-orders_schema" data-verso-hover="24">orders_schema</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-6762">]</span><span class="punctuation bracket token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-6757">)</span><span class="inter-text">
+        </span><span class="literal string token" data-binding="" data-verso-hover="25">"SELECT * FROM customers
+         WHERE EXISTS (SELECT * FROM orders WHERE orders.customer_id = customers.customer_id)"</span><span class="inter-text">
+      </span><span class="punctuation operator token" data-binding="kw-occ-«term_=_»-6757">=</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-6933" data-verso-hover="0">sql%</span><span class="punctuation bracket token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-6933">(</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-6938">[</span><span class="const token" data-binding="const-customers_schema" data-verso-hover="23">customers_schema</span><span class="punctuation separator token" data-binding="kw-occ-«term[_]»-6938">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-orders_schema" data-verso-hover="24">orders_schema</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-6938">]</span><span class="punctuation bracket token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-6933">)</span><span class="inter-text">
+        </span><span class="literal string token" data-binding="" data-verso-hover="26">"SELECT * FROM customers
+         WHERE customers.customer_id IN (SELECT orders.customer_id FROM orders)"</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Command.declValSimple-7087">:=</span><span class="inter-text"> </span><span class="tactic" data-tactic-range="7090-7092"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.byTactic-7090" data-verso-hover="4">by</span><span class="tactic-state" style="display:none" data-rich-format="[{&quot;goalPrefix&quot;:&quot;⊢ &quot;,&quot;hypotheses&quot;:[],&quot;name&quot;:null,&quot;ppConclusion&quot;:&quot;{\&quot;annotations\&quot;:{\&quot;10\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288241\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;11\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288255\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1136020\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288241\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;12\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288259\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;13\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288260\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1361\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288260\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1398368\&quot;:{\&quot;binding\&quot;:\&quot;const-Decidable.decide\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;14\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288276\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;15\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288283\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;17729\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288196\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;18176389\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288240\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;2\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288196\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;21844\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288276\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;22282240\&quot;:{\&quot;binding\&quot;:\&quot;const-LeanDatabase.semijoin\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;22373905\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288283\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;3\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288197\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;32\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288284\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;33\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288291\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;349588\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288284\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;4433\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288197\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;4544096\&quot;:{\&quot;binding\&quot;:\&quot;const-Decidable.decide\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;5441\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288259\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;5593477\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288291\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;70996\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288213\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;72613888\&quot;:{\&quot;binding\&quot;:\&quot;const-LeanDatabase.semijoin\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;72705553\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288255\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;8\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288213\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;9\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1288240\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;}},\&quot;fmt\&quot;:[6,[6,[3,2,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,2,\&quot;customers\&quot;]]],[4,1,[4,[6,[3,2,[7,3,\&quot;orders\&quot;]]],\&quot; =>\&quot;]]]]]],[4,1,[6,[3,2,[4,[6,[3,2,[7,72613888,\&quot;LeanDatabase.semijoin\&quot;]]],[4,1,[4,[6,[3,2,[7,17729,\&quot;customers\&quot;]]],[4,1,[4,[6,[3,2,[7,4433,\&quot;orders\&quot;]]],[4,1,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,8,\&quot;coords\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,9,\&quot;customers.customer_id\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,70996,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,70997,\&quot;0\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,10,\&quot;orders.coords\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,11,\&quot;orders.customer_id\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,1136020,\&quot;orders.coords\&quot;]]],[4,1,[6,[3,2,[7,1136021,\&quot;0\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,[6,[3,2,[7,4544096,\&quot;decide\&quot;]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,72705553,\&quot;orders.customer_id\&quot;]]],[4,[4,\&quot; =\&quot;,1],[6,[3,2,[7,18176389,\&quot;customers.customer_id\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],\&quot;)\&quot;]]]],[4,[4,\&quot; =\&quot;,1],[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,12,\&quot;customers\&quot;]]],[4,1,[4,[6,[3,2,[7,13,\&quot;orders\&quot;]]],\&quot; =>\&quot;]]]]]],[4,1,[6,[3,2,[4,[6,[3,2,[7,22282240,\&quot;LeanDatabase.semijoin\&quot;]]],[4,1,[4,[6,[3,2,[7,5441,\&quot;customers\&quot;]]],[4,1,[4,[6,[3,2,[7,1361,\&quot;orders\&quot;]]],[4,1,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,14,\&quot;coords\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,15,\&quot;customers.customer_id\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,21844,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,21845,\&quot;0\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,32,\&quot;orders.coords\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,33,\&quot;orders.customer_id\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,349588,\&quot;orders.coords\&quot;]]],[4,1,[6,[3,2,[7,349589,\&quot;0\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,[6,[3,2,[7,1398368,\&quot;decide\&quot;]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,22373905,\&quot;customers.customer_id\&quot;]]],[4,[4,\&quot; =\&quot;,1],[6,[3,2,[7,5593477,\&quot;orders.customer_id\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]}&quot;}]"><span class="goal"><span class="conclusion"><span class="prefix">⊢ </span><span class="type"><span class="unknown token" data-binding="">(fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288196" data-verso-hover="27">customers</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288197" data-verso-hover="28">orders</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+    </span><span class="const token" data-binding="const-LeanDatabase.semijoin" data-verso-hover="29">LeanDatabase.semijoin</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288196" data-verso-hover="27">customers</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288197" data-verso-hover="28">orders</span><span class="inter-text"> </span><span class="keyword token" data-binding="">fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288213" data-verso-hover="30">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+      </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288240" data-verso-hover="8">customers.customer_id</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288213" data-verso-hover="30">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">0</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+      </span><span class="keyword token" data-binding="">fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288241" data-verso-hover="31">orders.coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+      </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288255" data-verso-hover="8">orders.customer_id</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288241" data-verso-hover="31">orders.coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">0</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+      </span><span class="const token" data-binding="const-Decidable.decide" data-verso-hover="12">decide</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">(</span><span class="var token" data-binding="var-_uniq.1288255" data-verso-hover="8">orders.customer_id</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288240" data-verso-hover="8">customers.customer_id</span><span class="const token" data-binding="const-Eq" data-verso-hover="14">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">=</span><span class="inter-text">
+  </span><span class="keyword token" data-binding="">fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288259" data-verso-hover="27">customers</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288260" data-verso-hover="28">orders</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+  </span><span class="const token" data-binding="const-LeanDatabase.semijoin" data-verso-hover="29">LeanDatabase.semijoin</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288259" data-verso-hover="27">customers</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288260" data-verso-hover="28">orders</span><span class="inter-text"> </span><span class="keyword token" data-binding="">fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288276" data-verso-hover="30">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288283" data-verso-hover="8">customers.customer_id</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288276" data-verso-hover="30">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">0</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="">fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288284" data-verso-hover="31">orders.coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288291" data-verso-hover="8">orders.customer_id</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288284" data-verso-hover="31">orders.coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">0</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+    </span><span class="const token" data-binding="const-Decidable.decide" data-verso-hover="12">decide</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">(</span><span class="var token" data-binding="var-_uniq.1288283" data-verso-hover="8">customers.customer_id</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1288291" data-verso-hover="8">orders.customer_id</span><span class="const token" data-binding="const-Eq" data-verso-hover="14">)</span></span></span></span></span></span><span class="inter-text">
+  </span><span class="tactic" data-tactic-range="7095-7104"><span class="keyword token" data-binding="kw-occ-LeanDatabase.SQLEquiv.tacticSql_equiv-7095">sql_equiv</span><span class="tactic-state" style="display:none">All goals completed! 🐙</span></span><span class="inter-text">
+</span><span class="unknown token" data-binding=""></span></code><div class="panel-divider"></div>
+              <div class="panel-cell">
+                <div class="info-panel"></div>
+                </div>
+              </div>
+            </section>
+          </section>
+        <section>
+          <section>
+            <h2>
+              4</h2>
+            <div class="r-hstack fragment">
+              <div class="r-vstack">
+                <p style="text-align: center; margin-bottom: 0.5em; font-size: 1.1em">
+                  <strong><code>employees</code></strong></p>
+                <table class="slide-table row-seps"><thead><tr><th scope="col"><p>
+                          Column</p>
+                        </th><th scope="col"><p>
+                          Type
+</p>
+                        </th></tr></thead><tbody><tr><td><p>
+                          <code>emp_id</code></p>
+                        </td><td><p>
+                          <code>INT</code>
+</p>
+                        </td></tr><tr><td><p>
+                          <code>dept_id</code></p>
+                        </td><td><p>
+                          <code>INT</code>
+</p>
+                        </td></tr><tr><td><p>
+                          <code>salary</code></p>
+                        </td><td><p>
+                          <code>INT</code></p>
+                        </td></tr></tbody></table></div>
+              <div class="r-vstack">
+                <p style="text-align: center; margin-bottom: 0.5em; font-size: 1.1em">
+                  <strong><code>departments</code></strong></p>
+                <table class="slide-table row-seps"><thead><tr><th scope="col"><p>
+                          Column</p>
+                        </th><th scope="col"><p>
+                          Type
+</p>
+                        </th></tr></thead><tbody><tr><td><p>
+                          <code>dept_id</code></p>
+                        </td><td><p>
+                          <code>INT</code>
+</p>
+                        </td></tr><tr><td><p>
+                          <code>name</code></p>
+                        </td><td><p>
+                          <code>STRING</code>
+</p>
+                        </td></tr><tr><td><p>
+                          <code>budget</code></p>
+                        </td><td><p>
+                          <code>INT</code></p>
+                        </td></tr></tbody></table></div>
+              </div>
+            <div class="r-hstack fragment" style="margin-top: 2em;">
+              <pre><code class="language-sql">SELECT * FROM
+  (SELECT * FROM employees
+   WHERE salary &gt; 50000) AS e
+JOIN departments
+  ON e.dept_id
+   = departments.dept_id
+WHERE departments.budget
+    &gt; 100000
+</code></pre><p class="equiv-mark" style="margin: 0 2em; align-self: center;">
+                ≡</p>
+              <pre><code class="language-sql">SELECT * FROM employees
+JOIN departments
+  ON employees.dept_id
+   = departments.dept_id
+WHERE employees.salary
+    &gt; 50000
+  AND departments.budget
+    &gt; 100000
+</code></pre></div>
+            </section>
+          <section>
+            <h3>
+              Proof</h3>
+            <div class="code-with-panel r-stretch">
+              <code class="hl lean block"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.example-8272">example</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-8280">:</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-8286" data-verso-hover="0">sql%</span><span class="punctuation bracket token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-8286">(</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-8291">[</span><span class="const token" data-binding="const-employees_schema" data-verso-hover="32">employees_schema</span><span class="punctuation separator token" data-binding="kw-occ-«term[_]»-8291">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-departments_schema" data-verso-hover="33">departments_schema</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-8291">]</span><span class="punctuation bracket token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-8286">)</span><span class="inter-text">
+        </span><span class="literal string token" data-binding="" data-verso-hover="34">"SELECT * FROM (SELECT * FROM employees WHERE salary &gt; 50000) AS e
+         JOIN departments ON dept_id = departments.dept_id
+         WHERE departments.budget &gt; 100000"</span><span class="inter-text">
+      </span><span class="punctuation operator token" data-binding="kw-occ-«term_=_»-8286">=</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-8517" data-verso-hover="0">sql%</span><span class="punctuation bracket token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-8517">(</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-8522">[</span><span class="const token" data-binding="const-employees_schema" data-verso-hover="32">employees_schema</span><span class="punctuation separator token" data-binding="kw-occ-«term[_]»-8522">,</span><span class="inter-text"> </span><span class="const token" data-binding="const-departments_schema" data-verso-hover="33">departments_schema</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-8522">]</span><span class="punctuation bracket token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-8517">)</span><span class="inter-text">
+        </span><span class="literal string token" data-binding="" data-verso-hover="35">"SELECT * FROM employees
+         JOIN departments ON employees.dept_id = departments.dept_id
+         WHERE employees.salary &gt; 50000 AND departments.budget &gt; 100000"</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Command.declValSimple-8737">:=</span><span class="inter-text"> </span><span class="tactic" data-tactic-range="8740-8742"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.byTactic-8740" data-verso-hover="4">by</span><span class="tactic-state" style="display:none" data-rich-format="[{&quot;goalPrefix&quot;:&quot;⊢ &quot;,&quot;hypotheses&quot;:[],&quot;name&quot;:null,&quot;ppConclusion&quot;:&quot;{\&quot;annotations\&quot;:{\&quot;10\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004397\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;11\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004415\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1134948\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004354\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1162193169\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004383\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1162941969\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004456\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;12\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004438\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;13\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004456\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1365\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004465\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1394084\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004474\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;14\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004464\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1427548240\&quot;:{\&quot;binding\&quot;:\&quot;const-Decidable.decide\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;1427548433\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004481\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;15\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004465\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;18170880\&quot;:{\&quot;binding\&quot;:\&quot;const-LeanDatabase.restriction\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;18170964\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004438\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;2\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004344\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;22840771857\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004495\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;283648\&quot;:{\&quot;binding\&quot;:\&quot;const-LeanDatabase.restriction\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;283732\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004354\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;283904\&quot;:{\&quot;binding\&quot;:\&quot;const-LeanDatabase.TypedRelationOfList.append\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;290548240\&quot;:{\&quot;binding\&quot;:\&quot;const-Decidable.decide\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;290548293\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004397\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;3\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004345\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;32\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004474\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;33\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004481\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;34\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004493\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;348516\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004474\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;35\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004494\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;356887109\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004494\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;36\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004495\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;4437\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004345\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;4539812\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004354\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;4648771857\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004415\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;5457\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004464\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;5576356\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004474\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;5710192912\&quot;:{\&quot;binding\&quot;:\&quot;const-Decidable.decide\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;70981\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004344\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;72637072\&quot;:{\&quot;binding\&quot;:\&quot;const-Decidable.decide\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;72683872\&quot;:{\&quot;binding\&quot;:\&quot;const-Decidable.decide\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;8\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004354\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;87040\&quot;:{\&quot;binding\&quot;:\&quot;const-LeanDatabase.restriction\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;87124\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004474\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;87296\&quot;:{\&quot;binding\&quot;:\&quot;const-LeanDatabase.TypedRelationOfList.append\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;89221776\&quot;:{\&quot;binding\&quot;:\&quot;const-Decidable.decide\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;9\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004383\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;91363086609\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.1004493\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;}},\&quot;fmt\&quot;:[6,[6,[3,2,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,2,\&quot;employees\&quot;]]],[4,1,[4,[6,[3,2,[7,3,\&quot;departments\&quot;]]],\&quot; =>\&quot;]]]]]],[4,1,[6,[3,2,[4,[6,[3,2,[7,283648,\&quot;LeanDatabase.restriction\&quot;]]],[4,1,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,8,\&quot;coords\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,9,\&quot;employees.dept_id\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,283732,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,283733,\&quot;1\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,10,\&quot;departments.dept_id\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,1134948,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,1134949,\&quot;3\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,11,\&quot;departments.budget\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,4539812,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,4539813,\&quot;5\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,[6,[3,2,[4,[6,[3,2,[7,290548240,\&quot;decide\&quot;]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,4648771857,\&quot;departments.budget\&quot;]]],[4,[4,\&quot; >\&quot;,1],[6,[3,2,[7,1162192965,\&quot;100000\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]],[4,[4,\&quot; &amp;&amp;\&quot;,1],[6,[3,2,[4,[6,[3,2,[7,72637072,\&quot;decide\&quot;]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,1162193169,\&quot;employees.dept_id\&quot;]]],[4,[4,\&quot; =\&quot;,1],[6,[3,2,[7,290548293,\&quot;departments.dept_id\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],\&quot;)\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,283904,\&quot;LeanDatabase.TypedRelationOfList.append\&quot;]]],[4,1,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,18170880,\&quot;LeanDatabase.restriction\&quot;]]],[4,1,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,12,\&quot;coords\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,13,\&quot;employees.salary\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,18170964,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,18170965,\&quot;2\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,[6,[3,2,[7,72683872,\&quot;decide\&quot;]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,1162941969,\&quot;employees.salary\&quot;]]],[4,[4,\&quot; >\&quot;,1],[6,[3,2,[7,290735493,\&quot;50000\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]]]]]]]]]]]]]]]],\&quot;)\&quot;]]]],[4,1,[6,[3,2,[7,70981,\&quot;employees\&quot;]]]]]]]]]],\&quot;)\&quot;]]]],[4,1,[6,[3,2,[7,4437,\&quot;departments\&quot;]]]]]]]]]],\&quot;)\&quot;]]]]]]]]]]]]],\&quot;)\&quot;]]]],[4,[4,\&quot; =\&quot;,1],[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,14,\&quot;employees\&quot;]]],[4,1,[4,[6,[3,2,[7,15,\&quot;departments\&quot;]]],\&quot; =>\&quot;]]]]]],[4,1,[6,[3,2,[4,[6,[3,2,[7,87040,\&quot;LeanDatabase.restriction\&quot;]]],[4,1,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,32,\&quot;coords\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,33,\&quot;employees.dept_id\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,87124,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,87125,\&quot;1\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,34,\&quot;employees.salary\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,348516,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,348517,\&quot;2\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,35,\&quot;departments.dept_id\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,1394084,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,1394085,\&quot;3\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,36,\&quot;departments.budget\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,5576356,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,5576357,\&quot;5\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,[6,[3,2,[4,[6,[3,2,[4,[6,[3,2,[7,5710192912,\&quot;decide\&quot;]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,91363086609,\&quot;employees.salary\&quot;]]],[4,[4,\&quot; >\&quot;,1],[6,[3,2,[7,22840771653,\&quot;50000\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]],[4,[4,\&quot; &amp;&amp;\&quot;,1],[6,[3,2,[4,[6,[3,2,[7,1427548240,\&quot;decide\&quot;]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,22840771857,\&quot;departments.budget\&quot;]]],[4,[4,\&quot; >\&quot;,1],[6,[3,2,[7,5710192965,\&quot;100000\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]]]]]],[4,[4,\&quot; &amp;&amp;\&quot;,1],[6,[3,2,[4,[6,[3,2,[7,89221776,\&quot;decide\&quot;]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,1427548433,\&quot;employees.dept_id\&quot;]]],[4,[4,\&quot; =\&quot;,1],[6,[3,2,[7,356887109,\&quot;departments.dept_id\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],\&quot;)\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[4,[6,[3,2,[7,5457,\&quot;employees\&quot;]]],[4,\&quot;.\&quot;,[7,87296,\&quot;append\&quot;]]]]],[4,1,[6,[3,2,[7,1365,\&quot;departments\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]]]]]]]]]]]]}&quot;}]"><span class="goal"><span class="conclusion"><span class="prefix">⊢ </span><span class="type"><span class="unknown token" data-binding="">(fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004344" data-verso-hover="36">employees</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004345" data-verso-hover="37">departments</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+    </span><span class="const token" data-binding="const-LeanDatabase.restriction" data-verso-hover="6">LeanDatabase.restriction</span><span class="inter-text">
+      </span><span class="unknown token" data-binding="">(fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004354" data-verso-hover="38">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+        </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004383" data-verso-hover="8">employees.dept_id</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004354" data-verso-hover="38">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">1</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+        </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004397" data-verso-hover="8">departments.dept_id</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004354" data-verso-hover="38">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">3</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+        </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004415" data-verso-hover="8">departments.budget</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004354" data-verso-hover="38">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">5</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+        </span><span class="const token" data-binding="const-Decidable.decide" data-verso-hover="12">decide</span><span class="inter-text"> </span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">(</span><span class="var token" data-binding="var-_uniq.1004415" data-verso-hover="8">departments.budget</span><span class="inter-text"> </span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">&gt;</span><span class="inter-text"> </span><span class="unknown token" data-binding="">100000</span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">)</span><span class="inter-text"> </span><span class="const token" data-binding="const-Bool.and" data-verso-hover="15">&&</span><span class="inter-text"> </span><span class="const token" data-binding="const-Decidable.decide" data-verso-hover="12">decide</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">(</span><span class="var token" data-binding="var-_uniq.1004383" data-verso-hover="8">employees.dept_id</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004397" data-verso-hover="8">departments.dept_id</span><span class="const token" data-binding="const-Eq" data-verso-hover="14">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+      </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-LeanDatabase.TypedRelationOfList.append" data-verso-hover="39">LeanDatabase.TypedRelationOfList.append</span><span class="inter-text">
+        </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-LeanDatabase.restriction" data-verso-hover="6">LeanDatabase.restriction</span><span class="inter-text">
+          </span><span class="unknown token" data-binding="">(fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004438" data-verso-hover="40">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+            </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004456" data-verso-hover="8">employees.salary</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004438" data-verso-hover="40">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">2</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+            </span><span class="const token" data-binding="const-Decidable.decide" data-verso-hover="12">decide</span><span class="inter-text"> </span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">(</span><span class="var token" data-binding="var-_uniq.1004456" data-verso-hover="8">employees.salary</span><span class="inter-text"> </span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">&gt;</span><span class="inter-text"> </span><span class="unknown token" data-binding="">50000</span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+          </span><span class="var token" data-binding="var-_uniq.1004344" data-verso-hover="36">employees</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+        </span><span class="var token" data-binding="var-_uniq.1004345" data-verso-hover="37">departments</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">=</span><span class="inter-text">
+  </span><span class="keyword token" data-binding="">fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004464" data-verso-hover="36">employees</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004465" data-verso-hover="37">departments</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+  </span><span class="const token" data-binding="const-LeanDatabase.restriction" data-verso-hover="6">LeanDatabase.restriction</span><span class="inter-text">
+    </span><span class="unknown token" data-binding="">(fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004474" data-verso-hover="38">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+      </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004481" data-verso-hover="8">employees.dept_id</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004474" data-verso-hover="38">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">1</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+      </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004493" data-verso-hover="8">employees.salary</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004474" data-verso-hover="38">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">2</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+      </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004494" data-verso-hover="8">departments.dept_id</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004474" data-verso-hover="38">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">3</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+      </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004495" data-verso-hover="8">departments.budget</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004474" data-verso-hover="38">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">5</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+      </span><span class="const token" data-binding="const-Decidable.decide" data-verso-hover="12">decide</span><span class="inter-text"> </span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">(</span><span class="var token" data-binding="var-_uniq.1004493" data-verso-hover="8">employees.salary</span><span class="inter-text"> </span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">&gt;</span><span class="inter-text"> </span><span class="unknown token" data-binding="">50000</span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">)</span><span class="inter-text"> </span><span class="const token" data-binding="const-Bool.and" data-verso-hover="15">&&</span><span class="inter-text"> </span><span class="const token" data-binding="const-Decidable.decide" data-verso-hover="12">decide</span><span class="inter-text"> </span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">(</span><span class="var token" data-binding="var-_uniq.1004495" data-verso-hover="8">departments.budget</span><span class="inter-text"> </span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">&gt;</span><span class="inter-text"> </span><span class="unknown token" data-binding="">100000</span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">)</span><span class="inter-text"> </span><span class="const token" data-binding="const-Bool.and" data-verso-hover="15">&&</span><span class="inter-text">
+        </span><span class="const token" data-binding="const-Decidable.decide" data-verso-hover="12">decide</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">(</span><span class="var token" data-binding="var-_uniq.1004481" data-verso-hover="8">employees.dept_id</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004494" data-verso-hover="8">departments.dept_id</span><span class="const token" data-binding="const-Eq" data-verso-hover="14">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+    </span><span class="unknown token" data-binding="">(</span><span class="var token" data-binding="var-_uniq.1004464" data-verso-hover="36">employees</span><span class="unknown token" data-binding="">.</span><span class="const token" data-binding="const-LeanDatabase.TypedRelationOfList.append" data-verso-hover="39">append</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1004465" data-verso-hover="37">departments</span><span class="unknown token" data-binding="">)</span></span></span></span></span></span><span class="inter-text">
+  </span><span class="tactic" data-tactic-range="8745-8754"><span class="keyword token" data-binding="kw-occ-LeanDatabase.SQLEquiv.tacticSql_equiv-8745">sql_equiv</span><span class="tactic-state" style="display:none">All goals completed! 🐙</span></span><span class="inter-text">
+</span><span class="unknown token" data-binding=""></span></code><div class="panel-divider"></div>
+              <div class="panel-cell">
+                <div class="info-panel"></div>
+                </div>
+              </div>
+            </section>
+          </section>
+        <section>
+          <section>
+            <h2>
+              5</h2>
+            <div class="r-hstack fragment">
+              <div class="r-vstack">
+                <p style="text-align: center; margin-bottom: 0.5em; font-size: 1.1em">
+                  <strong><code>orders</code></strong></p>
+                <table class="slide-table row-seps"><thead><tr><th scope="col"><p>
+                          Column</p>
+                        </th><th scope="col"><p>
+                          Type
+</p>
+                        </th></tr></thead><tbody><tr><td><p>
+                          <code>order_id</code></p>
+                        </td><td><p>
+                          <code>INT</code>
+</p>
+                        </td></tr><tr><td><p>
+                          <code>region</code></p>
+                        </td><td><p>
+                          <code>STRING</code>
+</p>
+                        </td></tr><tr><td><p>
+                          <code>amount</code></p>
+                        </td><td><p>
+                          <code>INT</code>
+</p>
+                        </td></tr><tr><td><p>
+                          <code>status</code></p>
+                        </td><td><p>
+                          <code>STRING</code></p>
+                        </td></tr></tbody></table></div>
+              </div>
+            <div class="r-hstack fragment" style="margin-top: 1em;">
+              <pre><code class="language-sql">(SELECT * FROM
+  (SELECT * FROM orders WHERE region = "US") AS a
+ WHERE NOT (NOT (amount &gt; 100)) AND status = "completed")
+UNION
+(SELECT * FROM
+  (SELECT * FROM orders WHERE region = "EU") AS b
+ WHERE amount &gt; 100 AND status = "completed")
+</code></pre><p class="equiv-mark" style="margin: 0 2em; align-self: center;">
+                ≡</p>
+              <pre><code class="language-sql">SELECT * FROM orders
+WHERE (region = "US" OR region = "EU")
+  AND amount &gt; 100 AND status = "completed"
+</code></pre></div>
+            </section>
+          <section>
+            <h3>
+              Proof</h3>
+            <div class="code-with-panel r-stretch">
+              <code class="hl lean block"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.example-9713">example</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-9721">:</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-9727" data-verso-hover="0">sql%</span><span class="punctuation bracket token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-9727">(</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-9732">[</span><span class="const token" data-binding="const-complex_orders_schema" data-verso-hover="41">complex_orders_schema</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-9732">]</span><span class="punctuation bracket token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-9727">)</span><span class="inter-text">
+        </span><span class="literal string token" data-binding="" data-verso-hover="42">"SELECT * FROM (SELECT * FROM orders WHERE region = \"US\") AS a
+         WHERE NOT (NOT (amount &gt; 100)) AND status = \"completed\"
+         UNION
+         SELECT * FROM (SELECT * FROM orders WHERE region = \"EU\") AS b
+         WHERE amount &gt; 100 AND status = \"completed\""</span><span class="inter-text">
+      </span><span class="punctuation operator token" data-binding="kw-occ-«term_=_»-9727">=</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-10049" data-verso-hover="0">sql%</span><span class="punctuation bracket token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-10049">(</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-10054">[</span><span class="const token" data-binding="const-complex_orders_schema" data-verso-hover="41">complex_orders_schema</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-10054">]</span><span class="punctuation bracket token" data-binding="kw-occ-LeanDatabase.«termSql%(_)_»-10049">)</span><span class="inter-text">
+        </span><span class="literal string token" data-binding="" data-verso-hover="43">"SELECT * FROM orders
+         WHERE (region = \"US\" OR region = \"EU\")
+           AND amount &gt; 100 AND status = \"completed\""</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Command.declValSimple-10217">:=</span><span class="inter-text"> </span><span class="tactic" data-tactic-range="10220-10222"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.byTactic-10220" data-verso-hover="4">by</span><span class="tactic-state" style="display:none" data-rich-format="[{&quot;goalPrefix&quot;:&quot;⊢ &quot;,&quot;hypotheses&quot;:[],&quot;name&quot;:null,&quot;ppConclusion&quot;:&quot;{\&quot;annotations\&quot;:{\&quot;10\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238054\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;11\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238070\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1131520\&quot;:{\&quot;binding\&quot;:\&quot;const-LeanDatabase.restriction\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;1131604\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.237988\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1134948\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238081\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1135616\&quot;:{\&quot;binding\&quot;:\&quot;const-LeanDatabase.restriction\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;1135700\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238108\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1158768913\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238033\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1162191121\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238088\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;12\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238081\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;13\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238088\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;14\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238089\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1415218245\&quot;:{\&quot;binding\&quot;:null,\&quot;cssClass\&quot;:\&quot;literal string\&quot;},\&quot;1415218449\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238134\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;1415221521\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238135\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;15\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238108\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;17685\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.237971\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;18108768\&quot;:{\&quot;binding\&quot;:\&quot;const-Decidable.decide\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;18159248\&quot;:{\&quot;binding\&quot;:\&quot;const-Decidable.decide\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;18171269\&quot;:{\&quot;binding\&quot;:null,\&quot;cssClass\&quot;:\&quot;literal string\&quot;},\&quot;2\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.237971\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;21504\&quot;:{\&quot;binding\&quot;:\&quot;const-LeanDatabase.restriction\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;21588\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238127\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;22112848\&quot;:{\&quot;binding\&quot;:\&quot;const-Decidable.decide\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;283648\&quot;:{\&quot;binding\&quot;:\&quot;const-LeanDatabase.restriction\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;283732\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238081\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;289692180\&quot;:{\&quot;binding\&quot;:\&quot;const-Bool.not\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;289692229\&quot;:{\&quot;binding\&quot;:null,\&quot;cssClass\&quot;:\&quot;literal string\&quot;},\&quot;289740305\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238070\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;290547985\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238089\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;3\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.237988\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;32\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238115\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;33\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238118\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;34\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238127\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;345508\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238127\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;35\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238134\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;353804560\&quot;:{\&quot;binding\&quot;:\&quot;const-Decidable.decide\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;353804613\&quot;:{\&quot;binding\&quot;:null,\&quot;cssClass\&quot;:\&quot;literal string\&quot;},\&quot;353805585\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238136\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;36\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238135\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;37\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238136\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;4437\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.237971\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;4526436\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.237988\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;4527104\&quot;:{\&quot;binding\&quot;:\&quot;const-LeanDatabase.restriction\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;4527188\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238054\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;4542816\&quot;:{\&quot;binding\&quot;:\&quot;const-Decidable.decide\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;4635074896\&quot;:{\&quot;binding\&quot;:\&quot;const-Decidable.decide\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;5660872977\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238134\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;70656\&quot;:{\&quot;binding\&quot;:\&quot;const-LeanDatabase.union\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;72423044\&quot;:{\&quot;binding\&quot;:\&quot;const-Bool.not\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;72423056\&quot;:{\&quot;binding\&quot;:\&quot;const-Decidable.decide\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;72435077\&quot;:{\&quot;binding\&quot;:null,\&quot;cssClass\&quot;:\&quot;literal string\&quot;},\&quot;72636944\&quot;:{\&quot;binding\&quot;:\&quot;const-Decidable.decide\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;72636997\&quot;:{\&quot;binding\&quot;:null,\&quot;cssClass\&quot;:\&quot;literal string\&quot;},\&quot;72685073\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238115\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;74161198353\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238019\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;8\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238019\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;85\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238118\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;86372\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238127\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;},\&quot;88451152\&quot;:{\&quot;binding\&quot;:\&quot;const-Decidable.decide\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;88451344\&quot;:{\&quot;binding\&quot;:\&quot;const-Decidable.decide\&quot;,\&quot;cssClass\&quot;:\&quot;const\&quot;},\&quot;88451397\&quot;:{\&quot;binding\&quot;:null,\&quot;cssClass\&quot;:\&quot;literal string\&quot;},\&quot;9\&quot;:{\&quot;binding\&quot;:\&quot;var-_uniq.238033\&quot;,\&quot;cssClass\&quot;:\&quot;var\&quot;}},\&quot;fmt\&quot;:[6,[6,[3,2,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,2,\&quot;orders\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,[6,[3,2,[7,70656,\&quot;LeanDatabase.union\&quot;]]],[4,1,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,1131520,\&quot;LeanDatabase.restriction\&quot;]]],[4,1,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,3,\&quot;coords\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,8,\&quot;orders.amount\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,1131604,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,1131605,\&quot;2\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,9,\&quot;orders.status\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,4526436,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,4526437,\&quot;3\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,[6,[3,2,[4,[7,72423044,\&quot;!\&quot;],[6,[3,2,[4,[7,289692180,\&quot;!\&quot;],[6,[3,2,[4,[6,[3,2,[7,4635074896,\&quot;decide\&quot;]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,74161198353,\&quot;orders.amount\&quot;]]],[4,[4,\&quot; >\&quot;,1],[6,[3,2,[7,18540299589,\&quot;100\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]]]]]]]],[4,[4,\&quot; &amp;&amp;\&quot;,1],[6,[3,2,[4,[6,[3,2,[7,72423056,\&quot;decide\&quot;]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,1158768913,\&quot;orders.status\&quot;]]],[4,[4,\&quot; =\&quot;,1],[6,[3,2,[7,289692229,\&quot;\\\&quot;completed\\\&quot;\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],\&quot;)\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,4527104,\&quot;LeanDatabase.restriction\&quot;]]],[4,1,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,10,\&quot;coords\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,11,\&quot;orders.region\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,4527188,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,4527189,\&quot;1\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,[6,[3,2,[7,18108768,\&quot;decide\&quot;]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,289740305,\&quot;orders.region\&quot;]]],[4,[4,\&quot; =\&quot;,1],[6,[3,2,[7,72435077,\&quot;\\\&quot;US\\\&quot;\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]]]]]]]]]]]]]]]],\&quot;)\&quot;]]]],[4,1,[6,[3,2,[7,17685,\&quot;orders\&quot;]]]]]]]]]],\&quot;)\&quot;]]]]]]]]]]],\&quot;)\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,283648,\&quot;LeanDatabase.restriction\&quot;]]],[4,1,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,12,\&quot;coords\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,13,\&quot;orders.amount\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,283732,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,283733,\&quot;2\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,14,\&quot;orders.status\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,1134948,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,1134949,\&quot;3\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,[6,[3,2,[4,[6,[3,2,[7,72636944,\&quot;decide\&quot;]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,1162191121,\&quot;orders.amount\&quot;]]],[4,[4,\&quot; >\&quot;,1],[6,[3,2,[7,290547781,\&quot;100\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]],[4,[4,\&quot; &amp;&amp;\&quot;,1],[6,[3,2,[4,[6,[3,2,[7,18159248,\&quot;decide\&quot;]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,290547985,\&quot;orders.status\&quot;]]],[4,[4,\&quot; =\&quot;,1],[6,[3,2,[7,72636997,\&quot;\\\&quot;completed\\\&quot;\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],\&quot;)\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,1135616,\&quot;LeanDatabase.restriction\&quot;]]],[4,1,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,15,\&quot;coords\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,32,\&quot;orders.region\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,1135700,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,1135701,\&quot;1\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,[6,[3,2,[7,4542816,\&quot;decide\&quot;]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,72685073,\&quot;orders.region\&quot;]]],[4,[4,\&quot; =\&quot;,1],[6,[3,2,[7,18171269,\&quot;\\\&quot;EU\\\&quot;\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]]]]]]]]]]]]]]]],\&quot;)\&quot;]]]],[4,1,[6,[3,2,[7,4437,\&quot;orders\&quot;]]]]]]]]]],\&quot;)\&quot;]]]]]]]]]]],\&quot;)\&quot;]]]]]]]]]]]]],\&quot;)\&quot;]]]],[4,[4,\&quot; =\&quot;,1],[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,33,\&quot;orders\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,[6,[3,2,[7,21504,\&quot;LeanDatabase.restriction\&quot;]]],[4,1,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[4,\&quot;fun\&quot;,[4,[6,[3,2,[4,1,[4,[6,[3,2,[7,34,\&quot;coords\&quot;]]],\&quot; =>\&quot;]]]],[4,1,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,35,\&quot;orders.region\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,21588,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,21589,\&quot;1\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,36,\&quot;orders.amount\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,86372,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,86373,\&quot;2\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,\&quot;let\&quot;,[4,1,[4,[7,37,\&quot;orders.status\&quot;],[4,\&quot; :=\&quot;,[4,1,[4,[6,[3,2,[4,[6,[3,2,[7,345508,\&quot;coords\&quot;]]],[4,1,[6,[3,2,[7,345509,\&quot;3\&quot;]]]]]]],[3,-2,[4,\&quot;;\&quot;,[4,\&quot;\\n\&quot;,[6,[3,2,[4,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[4,[6,[3,2,[7,353804560,\&quot;decide\&quot;]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,5660872977,\&quot;orders.region\&quot;]]],[4,[4,\&quot; =\&quot;,1],[6,[3,2,[7,1415218245,\&quot;\\\&quot;US\\\&quot;\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]],[4,[4,\&quot; ||\&quot;,1],[6,[3,2,[4,[6,[3,2,[7,88451152,\&quot;decide\&quot;]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,1415218449,\&quot;orders.region\&quot;]]],[4,[4,\&quot; =\&quot;,1],[6,[3,2,[7,353804613,\&quot;\\\&quot;EU\\\&quot;\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]]]]]]],\&quot;)\&quot;]]]],[4,[4,\&quot; &amp;&amp;\&quot;,1],[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[4,[6,[3,2,[7,88451344,\&quot;decide\&quot;]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,1415221521,\&quot;orders.amount\&quot;]]],[4,[4,\&quot; >\&quot;,1],[6,[3,2,[7,353805381,\&quot;100\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]],[4,[4,\&quot; &amp;&amp;\&quot;,1],[6,[3,2,[4,[6,[3,2,[7,22112848,\&quot;decide\&quot;]]],[4,1,[6,[3,2,[4,\&quot;(\&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,353805585,\&quot;orders.status\&quot;]]],[4,[4,\&quot; =\&quot;,1],[6,[3,2,[7,88451397,\&quot;\\\&quot;completed\\\&quot;\&quot;]]]]]]]],\&quot;)\&quot;]]]]]]]]]]]]],\&quot;)\&quot;]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],\&quot;)\&quot;]]]],[4,1,[6,[3,2,[7,85,\&quot;orders\&quot;]]]]]]]]]]]]]]]]]}&quot;}]"><span class="goal"><span class="conclusion"><span class="prefix">⊢ </span><span class="type"><span class="unknown token" data-binding="">(fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.237971" data-verso-hover="44">orders</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+    </span><span class="const token" data-binding="const-LeanDatabase.union" data-verso-hover="22">LeanDatabase.union</span><span class="inter-text">
+      </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-LeanDatabase.restriction" data-verso-hover="6">LeanDatabase.restriction</span><span class="inter-text">
+        </span><span class="unknown token" data-binding="">(fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.237988" data-verso-hover="45">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+          </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238019" data-verso-hover="8">orders.amount</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.237988" data-verso-hover="45">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">2</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+          </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238033" data-verso-hover="46">orders.status</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.237988" data-verso-hover="45">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">3</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+          </span><span class="const token" data-binding="const-Bool.not" data-verso-hover="10">!</span><span class="const token" data-binding="const-Bool.not" data-verso-hover="10">!</span><span class="const token" data-binding="const-Decidable.decide" data-verso-hover="12">decide</span><span class="inter-text"> </span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">(</span><span class="var token" data-binding="var-_uniq.238019" data-verso-hover="8">orders.amount</span><span class="inter-text"> </span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">&gt;</span><span class="inter-text"> </span><span class="unknown token" data-binding="">100</span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">)</span><span class="inter-text"> </span><span class="const token" data-binding="const-Bool.and" data-verso-hover="15">&&</span><span class="inter-text"> </span><span class="const token" data-binding="const-Decidable.decide" data-verso-hover="12">decide</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">(</span><span class="var token" data-binding="var-_uniq.238033" data-verso-hover="46">orders.status</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">=</span><span class="inter-text"> </span><span class="literal string token" data-binding="" data-verso-hover="47">"completed"</span><span class="const token" data-binding="const-Eq" data-verso-hover="14">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+        </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-LeanDatabase.restriction" data-verso-hover="6">LeanDatabase.restriction</span><span class="inter-text">
+          </span><span class="unknown token" data-binding="">(fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238054" data-verso-hover="45">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+            </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238070" data-verso-hover="46">orders.region</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238054" data-verso-hover="45">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">1</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+            </span><span class="const token" data-binding="const-Decidable.decide" data-verso-hover="12">decide</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">(</span><span class="var token" data-binding="var-_uniq.238070" data-verso-hover="46">orders.region</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">=</span><span class="inter-text"> </span><span class="literal string token" data-binding="" data-verso-hover="48">"US"</span><span class="const token" data-binding="const-Eq" data-verso-hover="14">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+          </span><span class="var token" data-binding="var-_uniq.237971" data-verso-hover="44">orders</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+      </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-LeanDatabase.restriction" data-verso-hover="6">LeanDatabase.restriction</span><span class="inter-text">
+        </span><span class="unknown token" data-binding="">(fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238081" data-verso-hover="45">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+          </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238088" data-verso-hover="8">orders.amount</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238081" data-verso-hover="45">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">2</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+          </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238089" data-verso-hover="46">orders.status</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238081" data-verso-hover="45">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">3</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+          </span><span class="const token" data-binding="const-Decidable.decide" data-verso-hover="12">decide</span><span class="inter-text"> </span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">(</span><span class="var token" data-binding="var-_uniq.238088" data-verso-hover="8">orders.amount</span><span class="inter-text"> </span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">&gt;</span><span class="inter-text"> </span><span class="unknown token" data-binding="">100</span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">)</span><span class="inter-text"> </span><span class="const token" data-binding="const-Bool.and" data-verso-hover="15">&&</span><span class="inter-text"> </span><span class="const token" data-binding="const-Decidable.decide" data-verso-hover="12">decide</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">(</span><span class="var token" data-binding="var-_uniq.238089" data-verso-hover="46">orders.status</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">=</span><span class="inter-text"> </span><span class="literal string token" data-binding="" data-verso-hover="47">"completed"</span><span class="const token" data-binding="const-Eq" data-verso-hover="14">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+        </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-LeanDatabase.restriction" data-verso-hover="6">LeanDatabase.restriction</span><span class="inter-text">
+          </span><span class="unknown token" data-binding="">(fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238108" data-verso-hover="45">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+            </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238115" data-verso-hover="46">orders.region</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238108" data-verso-hover="45">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">1</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+            </span><span class="const token" data-binding="const-Decidable.decide" data-verso-hover="12">decide</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">(</span><span class="var token" data-binding="var-_uniq.238115" data-verso-hover="46">orders.region</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">=</span><span class="inter-text"> </span><span class="literal string token" data-binding="" data-verso-hover="49">"EU"</span><span class="const token" data-binding="const-Eq" data-verso-hover="14">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+          </span><span class="var token" data-binding="var-_uniq.237971" data-verso-hover="44">orders</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">=</span><span class="inter-text">
+  </span><span class="keyword token" data-binding="">fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238118" data-verso-hover="44">orders</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+  </span><span class="const token" data-binding="const-LeanDatabase.restriction" data-verso-hover="6">LeanDatabase.restriction</span><span class="inter-text">
+    </span><span class="unknown token" data-binding="">(fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238127" data-verso-hover="45">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+      </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238134" data-verso-hover="46">orders.region</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238127" data-verso-hover="45">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">1</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+      </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238135" data-verso-hover="8">orders.amount</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238127" data-verso-hover="45">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">2</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+      </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238136" data-verso-hover="46">orders.status</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.238127" data-verso-hover="45">coords</span><span class="inter-text"> </span><span class="unknown token" data-binding="">3</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+      </span><span class="const token" data-binding="const-Bool.or" data-verso-hover="11">(</span><span class="const token" data-binding="const-Decidable.decide" data-verso-hover="12">decide</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">(</span><span class="var token" data-binding="var-_uniq.238134" data-verso-hover="46">orders.region</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">=</span><span class="inter-text"> </span><span class="literal string token" data-binding="" data-verso-hover="48">"US"</span><span class="const token" data-binding="const-Eq" data-verso-hover="14">)</span><span class="inter-text"> </span><span class="const token" data-binding="const-Bool.or" data-verso-hover="11">||</span><span class="inter-text"> </span><span class="const token" data-binding="const-Decidable.decide" data-verso-hover="12">decide</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">(</span><span class="var token" data-binding="var-_uniq.238134" data-verso-hover="46">orders.region</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">=</span><span class="inter-text"> </span><span class="literal string token" data-binding="" data-verso-hover="49">"EU"</span><span class="const token" data-binding="const-Eq" data-verso-hover="14">)</span><span class="const token" data-binding="const-Bool.or" data-verso-hover="11">)</span><span class="inter-text"> </span><span class="const token" data-binding="const-Bool.and" data-verso-hover="15">&&</span><span class="inter-text">
+        </span><span class="const token" data-binding="const-Bool.and" data-verso-hover="15">(</span><span class="const token" data-binding="const-Decidable.decide" data-verso-hover="12">decide</span><span class="inter-text"> </span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">(</span><span class="var token" data-binding="var-_uniq.238135" data-verso-hover="8">orders.amount</span><span class="inter-text"> </span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">&gt;</span><span class="inter-text"> </span><span class="unknown token" data-binding="">100</span><span class="const token" data-binding="const-GT.gt" data-verso-hover="13">)</span><span class="inter-text"> </span><span class="const token" data-binding="const-Bool.and" data-verso-hover="15">&&</span><span class="inter-text"> </span><span class="const token" data-binding="const-Decidable.decide" data-verso-hover="12">decide</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">(</span><span class="var token" data-binding="var-_uniq.238136" data-verso-hover="46">orders.status</span><span class="inter-text"> </span><span class="const token" data-binding="const-Eq" data-verso-hover="14">=</span><span class="inter-text"> </span><span class="literal string token" data-binding="" data-verso-hover="47">"completed"</span><span class="const token" data-binding="const-Eq" data-verso-hover="14">)</span><span class="const token" data-binding="const-Bool.and" data-verso-hover="15">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+    </span><span class="var token" data-binding="var-_uniq.238118" data-verso-hover="44">orders</span></span></span></span></span></span><span class="inter-text">
+  </span><span class="tactic" data-tactic-range="10225-10234"><span class="keyword token" data-binding="kw-occ-LeanDatabase.SQLEquiv.tacticSql_equiv-10225">sql_equiv</span><span class="tactic-state" style="display:none">All goals completed! 🐙</span></span><span class="inter-text">
+</span><span class="unknown token" data-binding=""></span></code><div class="panel-divider"></div>
+              <div class="panel-cell">
+                <div class="info-panel"></div>
+                </div>
+              </div>
+            </section>
+          </section>
+        <section data-background-color="#211c17">
+          <h2>
+            <span class="kicker">UNDER THE HOOD</span> How Does This Actually Work?</h2>
+          </section>
+        <section>
+          <h2>
+            <span class="kicker">The real HOW?</span> Architecture</h2>
+          <table class="slide-table row-seps"><thead><tr><th scope="col"><p>
+                    Layer</p>
+                  </th><th scope="col"><p>
+                    File(s)</p>
+                  </th><th scope="col"><p>
+                    Job
+</p>
+                  </th></tr></thead><tbody><tr><td><p>
+                    Data model</p>
+                  </td><td><p>
+                    <code>TypedRelation.lean</code></p>
+                  </td><td><p>
+                    Tables as typed <code>Finset</code>s of rows
+</p>
+                  </td></tr><tr><td><p>
+                    Operators</p>
+                  </td><td><p>
+                    <code>Operators/*.lean</code></p>
+                  </td><td><p>
+                    <code>restriction</code>, <code>join</code>, <code>groupBy</code>, <code>select</code>, …
+</p>
+                  </td></tr><tr><td><p>
+                    Parser</p>
+                  </td><td><p>
+                    <code>Parser/*.lean</code>, <code>SQLSyntax.lean</code></p>
+                  </td><td><p>
+                    SQL text → real Lean terms
+</p>
+                  </td></tr><tr><td><p>
+                    Automation</p>
+                  </td><td><p>
+                    <code>SQLEquiv.lean</code>, <code>SQLToolbox.lean</code></p>
+                  </td><td><p>
+                    The <code>sql_equiv</code> tactic + lemma library</p>
+                  </td></tr></tbody></table></section>
+        <section>
+          <h2>
+            <span class="kicker">ABSTRACTIONS</span> Modeling Tables</h2>
+          <ul class="fragment">
+            <li>
+              <p>
+                A column is encoded in the definition <code>TypedTuple</code>.</p>
+              </li>
+            </ul>
+          <pre class="fragment"><code class="language-haskell">-- A row is a dependent function
+abbrev TypedTuple (colType : Fin n → Type) :=
+  (i : Fin n) → colType i
+</code></pre><ul class="fragment">
+            <li>
+              <p>
+                A table is encoded in the structure <code>TypedRelation</code>.</p>
+              </li>
+            </ul>
+          <pre class="fragment"><code class="language-haskell">@[ext]
+structure TypedRelation
+    (colType : Fin n → Type)
+    [∀ i, DecidableEq (colType i)] where
+  labels : Fin n → String
+  rows   : Finset (TypedTuple colType)
+</code></pre><ul class="fragment">
+            <li>
+              <p>
+                Here is how you can construct an empty Table.</p>
+              </li>
+            </ul>
+          <pre class="fragment"><code class="language-haskell">-- The empty relation
+def emptyRel {colType : Fin n → Type}
+    [∀ i, DecidableEq (colType i)]
+    (l : Fin n → String) : TypedRelation colType :=
+  { labels := l, rows := ∅ }
+
+</code></pre></section>
+        <section>
+          <h2>
+            <span class="kicker">OPERATORS</span> Relational Algebra in Lean (1/3)</h2>
+          <p>
+            Union is a simple operator that takes two relations with the same schema and returns a new relation containing all rows from both relations. In Lean, we can define the union of two <code>TypedRelation</code>s as follows:</p>
+          <pre><code class="language-haskell">-- Union
+@[simp, grind]
+def union (r1 r2 : TypedRelation colType) :
+    TypedRelation colType :=
+  { labels := r1.labels,
+    rows   := r1.rows ∪ r2.rows }
+
+</code></pre></section>
+        <section>
+          <h2>
+            <span class="kicker">OPERATORS</span> Relational Algebra in Lean (2/3)</h2>
+          <p>
+            Restriction is an operator that filters rows from a relation based on a given predicate. In Lean, we can define the restriction of a <code>TypedRelation</code> as follows:</p>
+          <pre><code class="language-haskell">-- Restriction (uses Finset.filter)
+@[simp, grind]
+def restriction (predicate : TypedTuple colType → Bool)
+    (rel : TypedRelation colType) :
+    TypedRelation colType :=
+  { labels := rel.labels,
+    rows   := rel.rows.filter (fun t =&gt; predicate t) }
+
+</code></pre></section>
+        <section>
+          <h2>
+            <span class="kicker">OPERATORS</span> Relational Algebra in Lean (3/3)</h2>
+          <p>
+            Projection is an operator that selects specific columns from a relation based on given indices. In Lean, we can define the projection of a <code>TypedRelation</code> as follows:</p>
+          <pre><code class="language-haskell">-- Projection (uses Finset.image)
+@[simp]
+def projection {m : Nat} (indices : Fin m → Fin n)
+    (rel : TypedRelation colType) :
+    TypedRelation (fun j =&gt; colType (indices j)) :=
+
+  let _ : ∀ j, DecidableEq (colType (indices j)) :=
+    fun _ =&gt; inferInstance
+  { labels := fun j =&gt; rel.labels (indices j),
+    rows   := rel.rows.image (fun t j =&gt; t (indices j)) }
+
+</code></pre></section>
+        <section>
+          <h2>
+            <span class="kicker">THEOREMS</span> Proving Properties for Free (1/2)</h2>
+          <p>
+            The following theorem states that a row is in the union of two relations if and only if it is in either of the two relations. This property can be proven using Lean's <code>simp</code> tactic, which simplifies expressions based on the definitions of the operators involved.</p>
+          <pre><code class="language-haskell">@[grind =]
+theorem union_row (r1 r2 : TypedRelation colType)
+    (row : TypedTuple colType) :
+    row ∈ (union r1 r2).rows ↔
+    row ∈ r1.rows ∨ row ∈ r2.rows := by
+  simp [union, Finset.mem_union]
+</code></pre></section>
+        <section>
+          <h2>
+            <span class="kicker">THEOREMS</span> Proving Properties for Free (2/2)</h2>
+          <p>
+            This theorem states that the union of the restriction of a relation with a predicate and the restriction of the same relation with the negation of that predicate is equal to the original relation. This property can be proven using Lean's <code>simp</code> tactic, which simplifies expressions based on the definitions of the operators involved.</p>
+          <pre><code class="language-haskell">@[grind =]
+theorem restriction_partition (p : TypedTuple colType → Bool) (r : TypedRelation colType) :
+    union (restriction p r) (restriction (fun t =&gt; !p t) r) = r := by
+  apply TypedRelation.ext
+  · rfl
+  · simp only [union, restriction]
+    ext t
+    simp only [Finset.mem_union, Finset.mem_filter]
+    grind
+</code></pre></section>
+        <section>
+          <h2>
+            <span class="kicker">THEOREMS</span> More Verified Properties</h2>
+          <pre class="fragment" style="position: absolute; top: 15%; left: -5%; transform: rotate(-3deg); z-index: 1; font-size: 0.7em; box-shadow: 0 4px 12px rgba(0,0,0,0.8); border-radius: 8px; width: 60%; background: #2d2d2d; padding: 10px;"><code class="language-haskell">@[simp, grind]
+def union (r1 r2 : TypedRelation colType) : TypedRelation colType
+</code></pre><pre class="fragment" style="position: absolute; top: 10%; left: 45%; transform: rotate(4deg); z-index: 2; font-size: 0.7em; box-shadow: 0 4px 12px rgba(0,0,0,0.8); border-radius: 8px; width: 55%; background: #2d2d2d; padding: 10px;"><code class="language-haskell">@[simp, grind]
+def restriction (predicate : TypedTuple colType → Bool)
+    (rel : TypedRelation colType) : TypedRelation colType
+</code></pre><pre class="fragment" style="position: absolute; top: 35%; left: -5%; transform: rotate(5deg); z-index: 3; font-size: 0.7em; box-shadow: 0 4px 12px rgba(0,0,0,0.8); border-radius: 8px; width: 60%; background: #2d2d2d; padding: 10px;"><code class="language-haskell">@[grind =]
+theorem union_idempotence (r : TypedRelation colType) :
+    union r r = r
+</code></pre><pre class="fragment" style="position: absolute; top: 50%; left: 35%; transform: rotate(-2deg); z-index: 4; font-size: 0.7em; box-shadow: 0 4px 12px rgba(0,0,0,0.8); border-radius: 8px; width: 70%; background: #2d2d2d; padding: 10px;"><code class="language-haskell">@[grind =]
+theorem union_row (r1 r2 : TypedRelation colType) :
+    (union r1 r2).rows = r1.rows ∪ r2.rows
+</code></pre><pre class="fragment" style="position: absolute; top: 75%; left: 10%; transform: rotate(-6deg); z-index: 5; font-size: 0.7em; box-shadow: 0 4px 12px rgba(0,0,0,0.8); border-radius: 8px; width: 80%; background: #2d2d2d; padding: 10px;"><code class="language-haskell">@[grind =]
+theorem projection_union {m : Nat} (indices : Fin m → Fin n)
+    (r s : TypedRelation colType) :
+    projection indices (union r s) =
+    union (projection indices r) (projection indices s)
+</code></pre></section>
+        <section>
+          <h2>
+            <span class="kicker">SYNTAX</span> Defining SQL Grammar</h2>
+          <pre><code class="language-haskell">syntax
+  "SELECT " (" DISTINCT ")? sql_cols
+  " FROM " sql_from
+  (" WHERE " term)?
+  (" GROUP " " BY " ident,* (" HAVING " term)?)?
+  (" ORDER " " BY " sql_col,*)?
+  (" LIMIT " num)?
+  (";")? : sql_query
+</code></pre></section>
+        <section>
+          <h2>
+            <span class="kicker">PARSER</span> From String to AST</h2>
+          <pre><code class="language-haskell">def parseSqlQuery
+    (tables : List (Name × List (Name × LeanDatabase.SQLTypeProxy)))
+    (str : String) : TermElabM (Expr × List (Name × LeanDatabase.SQLTypeProxy)) := do
+  let tables := tables.map (fun (tableName, columns) =&gt;
+    (tableName, LeanDatabase.schemaWithFullNames tableName columns))
+  let .ok stx := runParserCategory (← getEnv) `sql_query str
+    | throwError "Failed to parse SQL query: {str}"
+  let labels := tables.foldl (fun acc (_, columns) =&gt;
+    acc ++ columns.map (fun (name, _) =&gt; name)) []
+  let stx ← LeanDatabase.expandNames labels stx
+  LeanDatabase.elabSqlQuery tables stx
+</code></pre></section>
+        <section>
+          <h2>
+            <span class="kicker">AUTOMATION</span> The <code>sql_equiv</code> Tactic</h2>
+          <pre><code class="language-haskell">macro "sql_simp" : tactic =&gt;
+  `(tactic| simp_all [Finset.filter_filter, Finset.image_image])
+
+macro "sql_equiv" : tactic =&gt; `(tactic|
+  (repeat (first
+     | (apply TypedRelation.ext &lt;;&gt; try rfl)
+     | refine Finset.filter_congr (fun _ _ =&gt; ?_)
+     | refine Finset.image_congr (fun _ _ =&gt; ?_)
+     | sql_simp
+     | (apply funext; intro _))
+   all_goals (first
+     | grind +locals
+     | (apply Finset.ext; sql_simp; grind +locals))))
+</code></pre></section>
+        <section>
+          <h2>
+            <span class="kicker">WHAT'S NEXT</span> Three Directions</h2>
+          <ul class="fragment">
+            <li>
+              <p>
+                Use <code>plausible</code> (counterexample search) as an infrastructure for
+  <strong>disproof</strong> of equivalences.</p>
+              </li>
+            </ul>
+          <ul class="fragment">
+            <li>
+              <p>
+                <strong>SQL Safety Verification:</strong> Utilize the formalization of relational databases to automatically verify and check the safety of SQL queries.</p>
+              </li>
+            </ul>
+          <ul class="fragment">
+            <li>
+              <p>
+                <strong>Expanded Automation:</strong> Prove more theorems and annotate them with <code>simp</code> and <code>grind</code> so that <code>sql_equiv</code> handles as many cases as possible natively, or improve the <code>sql_equiv</code> tactic itself with smart metaprogramming.</p>
+              </li>
+            </ul>
+          </section>
+        <section data-background-color="#211c17">
+          <h2>
+            <span class="kicker"></span> Thank You</h2>
+          <p class="fragment">
+            Questions?</p>
+          <aside class="notes"><p>
+              Close by looping back to the opening framing: this isn't really about SQL specifically —
+it's a worked example of "LLM proposes, Lean disposes."</p>
+            </aside></section>
+        </div>
+      </div>
+    <script src="lib/reveal.js/dist/reveal.js"></script>
+    <script src="lib/reveal.js/plugin/notes/notes.js"></script>
+    <script src="lib/reveal.js/plugin/highlight/highlight.js"></script>
+    <script src="lib/katex/dist/katex.min.js"></script>
+    <script src="lib/math.js"></script>
+    <script>
+      
+      Reveal.initialize({
+        hash: true,
+        controls: true,
+        progress: true,
+        slideNumber: true,
+        center: true,
+        transition: 'fade',
+        width: 1280,
+        height: 720,
+        margin: 0.040000,
+        navigationMode: 'default',
+        autoSlide: 0,
+        autoSlideStoppable: true,
+        autoSlideMethod: null,
+        plugins: [ RevealNotes, RevealHighlight ]
+      });
+    </script>
+    <script src="lib/marked.min.js"></script>
+    <script src="lib/popper.js"></script>
+    <script src="lib/tippy.js"></script>
+    <script src="lib/tippy-panel-filter.js"></script>
+    <script src="lib/highlighting.js"></script>
+    <script src="lib/code-block-bg.js"></script>
+    <script src="lib/pretty.js"></script>
+    <script src="lib/panel.js"></script>
+    <script src="lib/lightbox.js"></script>
+    <script src="lib/illuminate-reveal.js"></script>
+    </body>
+  </html>

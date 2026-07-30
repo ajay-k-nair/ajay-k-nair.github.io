@@ -1,0 +1,95 @@
+{"9": "<code>Bool</code>",
+ "8": "<code>ℤ</code>",
+ "7":
+ "<code>LeanDatabase.TypedTupleOfList\n  [LeanDatabase.SQLTypeProxy.int, LeanDatabase.SQLTypeProxy.bool, LeanDatabase.SQLTypeProxy.float]</code>",
+ "6":
+ "<code>LeanDatabase.restriction {n : ℕ} {colType : Fin n → Type} [(i : Fin n) → DecidableEq (colType i)]\n  (predicate : LeanDatabase.TypedTuple colType → Bool) (rel : LeanDatabase.TypedRelation colType) :\n  LeanDatabase.TypedRelation colType</code>",
+ "5":
+ "<code>LeanDatabase.TypedRelationOfList\n  [LeanDatabase.SQLTypeProxy.int, LeanDatabase.SQLTypeProxy.bool, LeanDatabase.SQLTypeProxy.float]</code>",
+ "49": "<code><span class=\"literal string\">\"EU\"</span> : String</code>",
+ "48": "<code><span class=\"literal string\">\"US\"</span> : String</code>",
+ "47":
+ "<code><span class=\"literal string\">\"completed\"</span> : String</code>",
+ "46": "<code>String</code>",
+ "45":
+ "<code>LeanDatabase.TypedTupleOfList\n  [LeanDatabase.SQLTypeProxy.int, LeanDatabase.SQLTypeProxy.string, LeanDatabase.SQLTypeProxy.int,\n    LeanDatabase.SQLTypeProxy.string]</code>",
+ "44":
+ "<code>LeanDatabase.TypedRelationOfList\n  [LeanDatabase.SQLTypeProxy.int, LeanDatabase.SQLTypeProxy.string, LeanDatabase.SQLTypeProxy.int,\n    LeanDatabase.SQLTypeProxy.string]</code>",
+ "43":
+ "<code><span class=\"literal string\">\"SELECT * FROM orders\\n         WHERE (region = \\\"US\\\" OR region = \\\"EU\\\")\\n           AND amount &gt; 100 AND status = \\\"completed\\\"\"</span> : String</code>",
+ "42":
+ "<code><span class=\"literal string\">\"SELECT * FROM (SELECT * FROM orders WHERE region = \\\"US\\\") AS a\\n         WHERE NOT (NOT (amount &gt; 100)) AND status = \\\"completed\\\"\\n         UNION\\n         SELECT * FROM (SELECT * FROM orders WHERE region = \\\"EU\\\") AS b\\n         WHERE amount &gt; 100 AND status = \\\"completed\\\"\"</span> : String</code>",
+ "41":
+ "<code data-rich-format=\"{&quot;annotations&quot;:{&quot;1361&quot;:{&quot;binding&quot;:&quot;const-Lean.Name&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;341&quot;:{&quot;binding&quot;:&quot;const-LeanDatabase.SQLTypeProxy&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;4&quot;:{&quot;binding&quot;:&quot;const-complex_orders_schema&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;81&quot;:{&quot;binding&quot;:&quot;const-Lean.Name&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;84&quot;:{&quot;binding&quot;:&quot;const-List&quot;,&quot;cssClass&quot;:&quot;const&quot;}},&quot;fmt&quot;:[6,[6,[3,2,[4,[6,[3,2,[7,4,&quot;complex_orders_schema&quot;]]],[4,&quot; :&quot;,[4,1,[6,[3,2,[4,[6,[3,2,[7,81,&quot;Lean.Name&quot;]]],[4,[4,&quot; ×&quot;,1],[6,[3,2,[4,[6,[3,2,[7,84,&quot;List&quot;]]],[4,1,[6,[3,2,[4,&quot;(&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,1361,&quot;Lean.Name&quot;]]],[4,[4,&quot; ×&quot;,1],[6,[3,2,[7,341,&quot;LeanDatabase.SQLTypeProxy&quot;]]]]]]]],&quot;)&quot;]]]]]]]]]]]]]]]]]]}\">complex_orders_schema : Lean.Name × List (Lean.Name × LeanDatabase.SQLTypeProxy)</code>",
+ "40":
+ "<code>LeanDatabase.TypedTupleOfList\n  [LeanDatabase.SQLTypeProxy.int, LeanDatabase.SQLTypeProxy.int, LeanDatabase.SQLTypeProxy.int]</code>",
+ "4":
+ "<code class=\"docstring\">`by tac` constructs a term of the expected type by running the tactic(s) `tac`. </code>",
+ "39":
+ "<code>LeanDatabase.TypedRelationOfList.append {l1 l2 : List LeanDatabase.SQLTypeProxy}\n  (r1 : LeanDatabase.TypedRelationOfList l1) (r2 : LeanDatabase.TypedRelationOfList l2) :\n  LeanDatabase.TypedRelationOfList (l1 ++ l2)</code>",
+ "38":
+ "<code>LeanDatabase.TypedTupleOfList\n  [LeanDatabase.SQLTypeProxy.int, LeanDatabase.SQLTypeProxy.int, LeanDatabase.SQLTypeProxy.int,\n    LeanDatabase.SQLTypeProxy.int, LeanDatabase.SQLTypeProxy.string, LeanDatabase.SQLTypeProxy.int]</code>",
+ "37":
+ "<code>LeanDatabase.TypedRelationOfList\n  [LeanDatabase.SQLTypeProxy.int, LeanDatabase.SQLTypeProxy.string, LeanDatabase.SQLTypeProxy.int]</code>",
+ "36":
+ "<code>LeanDatabase.TypedRelationOfList\n  [LeanDatabase.SQLTypeProxy.int, LeanDatabase.SQLTypeProxy.int, LeanDatabase.SQLTypeProxy.int]</code>",
+ "35":
+ "<code><span class=\"literal string\">\"SELECT * FROM employees\\n         JOIN departments ON employees.dept_id = departments.dept_id\\n         WHERE employees.salary &gt; 50000 AND departments.budget &gt; 100000\"</span> : String</code>",
+ "34":
+ "<code><span class=\"literal string\">\"SELECT * FROM (SELECT * FROM employees WHERE salary &gt; 50000) AS e\\n         JOIN departments ON dept_id = departments.dept_id\\n         WHERE departments.budget &gt; 100000\"</span> : String</code>",
+ "33":
+ "<code data-rich-format=\"{&quot;annotations&quot;:{&quot;1361&quot;:{&quot;binding&quot;:&quot;const-Lean.Name&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;341&quot;:{&quot;binding&quot;:&quot;const-LeanDatabase.SQLTypeProxy&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;4&quot;:{&quot;binding&quot;:&quot;const-departments_schema&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;81&quot;:{&quot;binding&quot;:&quot;const-Lean.Name&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;84&quot;:{&quot;binding&quot;:&quot;const-List&quot;,&quot;cssClass&quot;:&quot;const&quot;}},&quot;fmt&quot;:[6,[6,[3,2,[4,[6,[3,2,[7,4,&quot;departments_schema&quot;]]],[4,&quot; :&quot;,[4,1,[6,[3,2,[4,[6,[3,2,[7,81,&quot;Lean.Name&quot;]]],[4,[4,&quot; ×&quot;,1],[6,[3,2,[4,[6,[3,2,[7,84,&quot;List&quot;]]],[4,1,[6,[3,2,[4,&quot;(&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,1361,&quot;Lean.Name&quot;]]],[4,[4,&quot; ×&quot;,1],[6,[3,2,[7,341,&quot;LeanDatabase.SQLTypeProxy&quot;]]]]]]]],&quot;)&quot;]]]]]]]]]]]]]]]]]]}\">departments_schema : Lean.Name × List (Lean.Name × LeanDatabase.SQLTypeProxy)</code>",
+ "32":
+ "<code data-rich-format=\"{&quot;annotations&quot;:{&quot;1361&quot;:{&quot;binding&quot;:&quot;const-Lean.Name&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;341&quot;:{&quot;binding&quot;:&quot;const-LeanDatabase.SQLTypeProxy&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;4&quot;:{&quot;binding&quot;:&quot;const-employees_schema&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;81&quot;:{&quot;binding&quot;:&quot;const-Lean.Name&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;84&quot;:{&quot;binding&quot;:&quot;const-List&quot;,&quot;cssClass&quot;:&quot;const&quot;}},&quot;fmt&quot;:[6,[6,[3,2,[4,[6,[3,2,[7,4,&quot;employees_schema&quot;]]],[4,&quot; :&quot;,[4,1,[6,[3,2,[4,[6,[3,2,[7,81,&quot;Lean.Name&quot;]]],[4,[4,&quot; ×&quot;,1],[6,[3,2,[4,[6,[3,2,[7,84,&quot;List&quot;]]],[4,1,[6,[3,2,[4,&quot;(&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,1361,&quot;Lean.Name&quot;]]],[4,[4,&quot; ×&quot;,1],[6,[3,2,[7,341,&quot;LeanDatabase.SQLTypeProxy&quot;]]]]]]]],&quot;)&quot;]]]]]]]]]]]]]]]]]]}\">employees_schema : Lean.Name × List (Lean.Name × LeanDatabase.SQLTypeProxy)</code>",
+ "31":
+ "<code>LeanDatabase.TypedTupleOfList [LeanDatabase.SQLTypeProxy.int, LeanDatabase.SQLTypeProxy.int]</code>",
+ "30":
+ "<code>LeanDatabase.TypedTupleOfList [LeanDatabase.SQLTypeProxy.int, LeanDatabase.SQLTypeProxy.string]</code>",
+ "3":
+ "<code><span class=\"literal string\">\"SELECT * FROM table\\n                              WHERE NOT (age &gt; 30) AND NOT isActive\"</span> : String</code>",
+ "29":
+ "<code>LeanDatabase.semijoin {n m : ℕ} {colType1 : Fin n → Type} [(i : Fin n) → DecidableEq (colType1 i)]\n  {colType2 : Fin m → Type} [(i : Fin m) → DecidableEq (colType2 i)] (r1 : LeanDatabase.TypedRelation colType1)\n  (r2 : LeanDatabase.TypedRelation colType2)\n  (cond : LeanDatabase.TypedTuple colType1 → LeanDatabase.TypedTuple colType2 → Bool) :\n  LeanDatabase.TypedRelation colType1</code>",
+ "28":
+ "<code>LeanDatabase.TypedRelationOfList [LeanDatabase.SQLTypeProxy.int, LeanDatabase.SQLTypeProxy.int]</code>",
+ "27":
+ "<code>LeanDatabase.TypedRelationOfList [LeanDatabase.SQLTypeProxy.int, LeanDatabase.SQLTypeProxy.string]</code>",
+ "26":
+ "<code><span class=\"literal string\">\"SELECT * FROM customers\\n         WHERE customers.customer_id IN (SELECT orders.customer_id FROM orders)\"</span> : String</code>",
+ "25":
+ "<code><span class=\"literal string\">\"SELECT * FROM customers\\n         WHERE EXISTS (SELECT * FROM orders WHERE orders.customer_id = customers.customer_id)\"</span> : String</code>",
+ "24":
+ "<code data-rich-format=\"{&quot;annotations&quot;:{&quot;1361&quot;:{&quot;binding&quot;:&quot;const-Lean.Name&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;341&quot;:{&quot;binding&quot;:&quot;const-LeanDatabase.SQLTypeProxy&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;4&quot;:{&quot;binding&quot;:&quot;const-orders_schema&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;81&quot;:{&quot;binding&quot;:&quot;const-Lean.Name&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;84&quot;:{&quot;binding&quot;:&quot;const-List&quot;,&quot;cssClass&quot;:&quot;const&quot;}},&quot;fmt&quot;:[6,[6,[3,2,[4,[6,[3,2,[7,4,&quot;orders_schema&quot;]]],[4,&quot; :&quot;,[4,1,[6,[3,2,[4,[6,[3,2,[7,81,&quot;Lean.Name&quot;]]],[4,[4,&quot; ×&quot;,1],[6,[3,2,[4,[6,[3,2,[7,84,&quot;List&quot;]]],[4,1,[6,[3,2,[4,&quot;(&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,1361,&quot;Lean.Name&quot;]]],[4,[4,&quot; ×&quot;,1],[6,[3,2,[7,341,&quot;LeanDatabase.SQLTypeProxy&quot;]]]]]]]],&quot;)&quot;]]]]]]]]]]]]]]]]]]}\">orders_schema : Lean.Name × List (Lean.Name × LeanDatabase.SQLTypeProxy)</code>",
+ "23":
+ "<code data-rich-format=\"{&quot;annotations&quot;:{&quot;1361&quot;:{&quot;binding&quot;:&quot;const-Lean.Name&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;341&quot;:{&quot;binding&quot;:&quot;const-LeanDatabase.SQLTypeProxy&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;4&quot;:{&quot;binding&quot;:&quot;const-customers_schema&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;81&quot;:{&quot;binding&quot;:&quot;const-Lean.Name&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;84&quot;:{&quot;binding&quot;:&quot;const-List&quot;,&quot;cssClass&quot;:&quot;const&quot;}},&quot;fmt&quot;:[6,[6,[3,2,[4,[6,[3,2,[7,4,&quot;customers_schema&quot;]]],[4,&quot; :&quot;,[4,1,[6,[3,2,[4,[6,[3,2,[7,81,&quot;Lean.Name&quot;]]],[4,[4,&quot; ×&quot;,1],[6,[3,2,[4,[6,[3,2,[7,84,&quot;List&quot;]]],[4,1,[6,[3,2,[4,&quot;(&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,1361,&quot;Lean.Name&quot;]]],[4,[4,&quot; ×&quot;,1],[6,[3,2,[7,341,&quot;LeanDatabase.SQLTypeProxy&quot;]]]]]]]],&quot;)&quot;]]]]]]]]]]]]]]]]]]}\">customers_schema : Lean.Name × List (Lean.Name × LeanDatabase.SQLTypeProxy)</code>",
+ "22":
+ "<code>LeanDatabase.union {n : ℕ} {colType : Fin n → Type} [(i : Fin n) → DecidableEq (colType i)]\n  (r1 r2 : LeanDatabase.TypedRelation colType) : LeanDatabase.TypedRelation colType</code>",
+ "21":
+ "<code>LeanDatabase.TypedTupleOfList [LeanDatabase.SQLTypeProxy.bool, LeanDatabase.SQLTypeProxy.int]</code>",
+ "20":
+ "<code>LeanDatabase.TypedRelationOfList [LeanDatabase.SQLTypeProxy.bool, LeanDatabase.SQLTypeProxy.int]</code>",
+ "2":
+ "<code><span class=\"literal string\">\"SELECT * FROM table\\n                          WHERE NOT (age &gt; 30 OR isActive)\"</span> : String</code>",
+ "19":
+ "<code><span class=\"literal string\">\"SELECT * FROM r1 WHERE r1.is_high_value\\n         UNION\\n         SELECT * FROM r2 WHERE r2.is_high_value\"</span> : String</code>",
+ "18":
+ "<code><span class=\"literal string\">\"SELECT * FROM (SELECT * FROM r1 UNION SELECT * FROM r2) AS u\\n         WHERE is_high_value\"</span> : String</code>",
+ "17":
+ "<code data-rich-format=\"{&quot;annotations&quot;:{&quot;1361&quot;:{&quot;binding&quot;:&quot;const-Lean.Name&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;341&quot;:{&quot;binding&quot;:&quot;const-LeanDatabase.SQLTypeProxy&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;4&quot;:{&quot;binding&quot;:&quot;const-r2_schema&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;81&quot;:{&quot;binding&quot;:&quot;const-Lean.Name&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;84&quot;:{&quot;binding&quot;:&quot;const-List&quot;,&quot;cssClass&quot;:&quot;const&quot;}},&quot;fmt&quot;:[6,[6,[3,2,[4,[6,[3,2,[7,4,&quot;r2_schema&quot;]]],[4,&quot; :&quot;,[4,1,[6,[3,2,[4,[6,[3,2,[7,81,&quot;Lean.Name&quot;]]],[4,[4,&quot; ×&quot;,1],[6,[3,2,[4,[6,[3,2,[7,84,&quot;List&quot;]]],[4,1,[6,[3,2,[4,&quot;(&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,1361,&quot;Lean.Name&quot;]]],[4,[4,&quot; ×&quot;,1],[6,[3,2,[7,341,&quot;LeanDatabase.SQLTypeProxy&quot;]]]]]]]],&quot;)&quot;]]]]]]]]]]]]]]]]]]}\">r2_schema : Lean.Name × List (Lean.Name × LeanDatabase.SQLTypeProxy)</code>",
+ "16":
+ "<code data-rich-format=\"{&quot;annotations&quot;:{&quot;1361&quot;:{&quot;binding&quot;:&quot;const-Lean.Name&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;341&quot;:{&quot;binding&quot;:&quot;const-LeanDatabase.SQLTypeProxy&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;4&quot;:{&quot;binding&quot;:&quot;const-r1_schema&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;81&quot;:{&quot;binding&quot;:&quot;const-Lean.Name&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;84&quot;:{&quot;binding&quot;:&quot;const-List&quot;,&quot;cssClass&quot;:&quot;const&quot;}},&quot;fmt&quot;:[6,[6,[3,2,[4,[6,[3,2,[7,4,&quot;r1_schema&quot;]]],[4,&quot; :&quot;,[4,1,[6,[3,2,[4,[6,[3,2,[7,81,&quot;Lean.Name&quot;]]],[4,[4,&quot; ×&quot;,1],[6,[3,2,[4,[6,[3,2,[7,84,&quot;List&quot;]]],[4,1,[6,[3,2,[4,&quot;(&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,1361,&quot;Lean.Name&quot;]]],[4,[4,&quot; ×&quot;,1],[6,[3,2,[7,341,&quot;LeanDatabase.SQLTypeProxy&quot;]]]]]]]],&quot;)&quot;]]]]]]]]]]]]]]]]]]}\">r1_schema : Lean.Name × List (Lean.Name × LeanDatabase.SQLTypeProxy)</code>",
+ "15":
+ "<code>Bool.and (x y : Bool) : Bool</code><span class=\"sep\"></span><code class=\"docstring\">Boolean “and”, also known as conjunction. `and x y` can be written `x && y`.\n\nThe corresponding propositional connective is `And : Prop → Prop → Prop`, written with the `∧`\noperator.\n\nThe Boolean `and` is a `@[macro_inline]` function in order to give it short-circuiting evaluation:\nif `x` is `false` then `y` is not evaluated at runtime.\n\n\nConventions for notations in identifiers:\n\n * The recommended spelling of `&&` in identifiers is `and`.\n\n * The recommended spelling of `||` in identifiers is `or`.</code>",
+ "14":
+ "<code>Eq.{u_1} {α : Sort u_1} : α → α → Prop</code><span class=\"sep\"></span><code class=\"docstring\">The equality relation. It has one introduction rule, `Eq.refl`.\nWe use `a = b` as notation for `Eq a b`.\nA fundamental property of equality is that it is an equivalence relation.\n```\nvariable (α : Type) (a b c d : α)\nvariable (hab : a = b) (hcb : c = b) (hcd : c = d)\n\nexample : a = d :=\n  Eq.trans (Eq.trans hab (Eq.symm hcb)) hcd\n```\nEquality is much more than an equivalence relation, however. It has the important property that every assertion\nrespects the equivalence, in the sense that we can substitute equal expressions without changing the truth value.\nThat is, given `h1 : a = b` and `h2 : p a`, we can construct a proof for `p b` using substitution: `Eq.subst h1 h2`.\nExample:\n```\nexample (α : Type) (a b : α) (p : α → Prop)\n        (h1 : a = b) (h2 : p a) : p b :=\n  Eq.subst h1 h2\n\nexample (α : Type) (a b : α) (p : α → Prop)\n    (h1 : a = b) (h2 : p a) : p b :=\n  h1 ▸ h2\n```\nThe triangle in the second presentation is a macro built on top of `Eq.subst` and `Eq.symm`, and you can enter it by typing `\\t`.\nFor more information: [Equality](https://lean-lang.org/theorem_proving_in_lean4/quantifiers_and_equality.html#equality)\n\n\nConventions for notations in identifiers:\n\n * The recommended spelling of `=` in identifiers is `eq`.</code>",
+ "13":
+ "<code>GT.gt.{u} {α : Type u} [LT α] (a b : α) : Prop</code><span class=\"sep\"></span><code class=\"docstring\">`a &gt; b` is an abbreviation for `b &lt; a`. \n\nConventions for notations in identifiers:\n\n * The recommended spelling of `&gt;` in identifiers is `gt`.</code>",
+ "12":
+ "<code>Decidable.decide (p : Prop) [h : Decidable p] : Bool</code><span class=\"sep\"></span><code class=\"docstring\">Converts a decidable proposition into a `Bool`.\n\nIf `p : Prop` is decidable, then `decide p : Bool` is the Boolean value\nthat is `true` if `p` is true and `false` if `p` is false.\n</code>",
+ "11":
+ "<code>Bool.or (x y : Bool) : Bool</code><span class=\"sep\"></span><code class=\"docstring\">Boolean “or”, also known as disjunction. `or x y` can be written `x || y`.\n\nThe corresponding propositional connective is `Or : Prop → Prop → Prop`, written with the `∨`\noperator.\n\nThe Boolean `or` is a `@[macro_inline]` function in order to give it short-circuiting evaluation:\nif `x` is `true` then `y` is not evaluated at runtime.\n</code>",
+ "10":
+ "<code>Bool.not : Bool → Bool</code><span class=\"sep\"></span><code class=\"docstring\">Boolean negation, also known as Boolean complement. `not x` can be written `!x`.\n\nThis is a function that maps the value `true` to `false` and the value `false` to `true`. The\npropositional connective is `Not : Prop → Prop`.\n\n\nConventions for notations in identifiers:\n\n * The recommended spelling of `!` in identifiers is `not`.</code>",
+ "1":
+ "<code data-rich-format=\"{&quot;annotations&quot;:{&quot;1361&quot;:{&quot;binding&quot;:&quot;const-Lean.Name&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;341&quot;:{&quot;binding&quot;:&quot;const-LeanDatabase.SQLTypeProxy&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;4&quot;:{&quot;binding&quot;:&quot;const-table_schema&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;81&quot;:{&quot;binding&quot;:&quot;const-Lean.Name&quot;,&quot;cssClass&quot;:&quot;const&quot;},&quot;84&quot;:{&quot;binding&quot;:&quot;const-List&quot;,&quot;cssClass&quot;:&quot;const&quot;}},&quot;fmt&quot;:[6,[6,[3,2,[4,[6,[3,2,[7,4,&quot;table_schema&quot;]]],[4,&quot; :&quot;,[4,1,[6,[3,2,[4,[6,[3,2,[7,81,&quot;Lean.Name&quot;]]],[4,[4,&quot; ×&quot;,1],[6,[3,2,[4,[6,[3,2,[7,84,&quot;List&quot;]]],[4,1,[6,[3,2,[4,&quot;(&quot;,[4,[3,-2,[6,[3,2,[4,[6,[3,2,[7,1361,&quot;Lean.Name&quot;]]],[4,[4,&quot; ×&quot;,1],[6,[3,2,[7,341,&quot;LeanDatabase.SQLTypeProxy&quot;]]]]]]]],&quot;)&quot;]]]]]]]]]]]]]]]]]]}\">table_schema : Lean.Name × List (Lean.Name × LeanDatabase.SQLTypeProxy)</code>",
+ "0":
+ "<code class=\"docstring\">`sql%(schema) \"SELECT … FROM … WHERE …\"` — a term-level elaborator that parses a **raw SQL\nstring** against `schema` and splices in the resulting `TypedRelation` term.\n\n```lean\nabbrev sch : List (Name × List (Name × SQLTypeProxy)) :=\n  [(`t, [(`age, .int), (`active, .bool)])]\n\ntheorem and_reorder :\n    sql%(sch) \"SELECT * FROM t WHERE age &gt; 30 AND active\"\n      = sql%(sch) \"SELECT * FROM t WHERE active AND age &gt; 30\" := by sql_equiv\n```\n\n`schema` is any Lean term of type `List (Name × List (Name × SQLTypeProxy))`; it is evaluated at\nelaboration time (via `evalExpr`) and handed to `parseSqlQuery`. </code>"}
